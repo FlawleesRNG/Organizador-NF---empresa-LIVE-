@@ -67,6 +67,18 @@ class UploadLoteTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "nao contem arquivos PDF"):
             _extrair_pdfs_zip(bio.getvalue())
 
+    def test_operadoras_reais_do_lote_sao_detectadas(self):
+        casos = {
+            "PONTO TELECOM COMUNICACOES LTDA": "PONTO TELECOM",
+            "Fibrion Internet LTDA": "FIBRION",
+            "Isptec Sistemas De Comunicacao Ltda": "ISPTEC",
+            "CONNECTRONIC SERVICOS LTDA": "EXO",
+            "NIPBR TELECOM": "NIPBR",
+        }
+        for texto, esperado in casos.items():
+            with self.subTest(texto=texto):
+                self.assertEqual(detectar_operadora(texto).operadora, esperado)
+
 
 if __name__ == "__main__":
     unittest.main()
