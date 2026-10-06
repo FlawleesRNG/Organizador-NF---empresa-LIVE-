@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-head">
+    <div>
+        <h1>Previa da importacao</h1>
+        <p>Confira o resultado antes de gravar no banco.</p>
+    </div>
+</header>
+
+<div class="cards">
+    <div class="metric"><strong>{{ resumo.total_linhas }}</strong><span>linhas</span></div>
+    <div class="metric"><strong>{{ resumo.novas_unidades }}</strong><span>novas</span></div>
+    <div class="metric"><strong>{{ resumo.atualizacoes }}</strong><span>atualizacoes</span></div>
+    <div class="metric"><strong>{{ resumo.cnpjs_invalidos }}</strong><span>CNPJ invalidos</span></div>
+    <div class="metric"><strong>{{ resumo.cnpjs_ausentes }}</strong><span>CNPJ ausentes</span></div>
+</div>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Linha</th>
+                <th>Codigo</th>
+                <th>Unidade</th>
+                <th>Tipo</th>
+                <th>CNPJ</th>
+                <th>Cidade</th>
+                <th>UF</th>
+                <th>Status</th>
+                <th>Avisos</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for linha in linhas %}
+            <tr>
+                <td>{{ linha.row_index }}</td>
+                <td>{{ linha.codigo_loja or "-" }}</td>
+                <td>{{ linha.nome or "-" }}</td>
+                <td>{{ linha.tipo_loja or "-" }}</td>
+                <td>{{ linha.cnpj|cnpj if linha.cnpj else "-" }}</td>
+                <td>{{ linha.cidade or "-" }}</td>
+                <td>{{ linha.uf or "-" }}</td>
+                <td><span class="badge {{ 'ok' if linha.status_cadastro == 'OK' else 'off' }}">{{ linha.status_cadastro }}</span></td>
+                <td>{{ linha.problemas|join("; ") if linha.problemas else "OK" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form method="post" action="/lojas/importar/confirmar" class="form-actions">
+    <input type="hidden" name="payload" value="{{ payload }}">
+    <a class="button" href="/lojas/importar">Voltar</a>
+    <button class="button primary" type="submit">Confirmar importacao</button>
+</form>
+{% endblock %}

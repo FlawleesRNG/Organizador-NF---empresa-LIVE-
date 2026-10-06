@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title or "Organizador de Faturas" }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-mark">TF</span>
+            <div>
+                <strong>Telemiza</strong>
+                <small>Organizador de Faturas</small>
+            </div>
+        </div>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/faturas/upload">Enviar Fatura</a>
+            <a href="/lojas">Lojas</a>
+            <a href="/historico">Histórico</a>
+            <a href="/revisar">Revisar</a>
+        </nav>
+    </aside>
+    <main class="main">
+        {% if msg %}<div class="alert success">{{ msg }}</div>{% endif %}
+        {% if erro %}<div class="alert error">{{ erro }}</div>{% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

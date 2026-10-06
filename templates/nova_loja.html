@@ -1,0 +1,14 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<header class="page-head"><div><h1>Nova loja</h1><p>Inclua uma unidade na base mestre.</p></div></header>
+{% if erro %}<div class="alert error">{{ erro }}</div>{% endif %}
+<form class="form-card" method="post">
+    <label>Codigo da loja<input name="codigo_loja" value="{{ loja.codigo_loja if loja else '' }}" placeholder="L164"></label>
+    <label>Unidade<input name="nome" required value="{{ loja.nome if loja else '' }}" placeholder="CENTER NORTE"></label>
+    <label>Tipo<input name="tipo_loja" value="{{ loja.tipo_loja if loja else '' }}" placeholder="Loja Propria"></label>
+    <label>CNPJ<input name="cnpj" value="{{ loja.cnpj if loja else '' }}" placeholder="35.303.139/0037-08"></label>
+    <label>Cidade<input name="cidade" value="{{ loja.cidade if loja else '' }}" placeholder="Sao Paulo"></label>
+    <label>UF<input name="uf" maxlength="2" value="{{ loja.uf if loja else '' }}" placeholder="SP"></label>
+    <div class="form-actions"><a class="button" href="/lojas">Cancelar</a><button class="button primary" type="submit">Cadastrar</button></div>
+</form>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-head"><div><h1>Revisar</h1><p>Faturas aguardando conferência ou que precisam de correção manual.</p></div></header>
+<div class="table-wrap">
+    <table>
+        <thead><tr><th>Data</th><th>Arquivo</th><th>CNPJ</th><th>Operadora</th><th>Motivo</th><th>Acoes</th></tr></thead>
+        <tbody>
+        {% for fatura in faturas %}
+            <tr>
+                <td>{{ fatura.created_at }}</td>
+                <td>{{ fatura.arquivo_original }}</td>
+                <td>{{ fatura.cnpj|cnpj if fatura.cnpj else "CNPJ NAO IDENTIFICADO" }}</td>
+                <td>{{ fatura.operadora or "-" }}</td>
+                <td>{{ fatura.motivo_revisao or "Dados identificados automaticamente — aguardando conferência" }}</td>
+                <td><a class="button" href="/faturas/{{ fatura.id }}/revisar">Abrir</a></td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6" class="empty">Nenhuma fatura em revisao.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

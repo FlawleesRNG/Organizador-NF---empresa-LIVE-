@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-head">
+    <div>
+        <h1>Importar lojas</h1>
+        <p>Envie um CSV para revisar antes de atualizar a base mestre.</p>
+    </div>
+</header>
+
+{% if erro %}<div class="alert error">{{ erro }}</div>{% endif %}
+{% if msg %}<div class="alert success">{{ msg }}</div>{% endif %}
+
+<form class="form-card" method="post" enctype="multipart/form-data">
+    <label>Arquivo CSV
+        <input type="file" name="arquivo" accept=".csv,text/csv" required>
+    </label>
+    <p class="muted">Cabecalhos aceitos: codigo_loja, codigo, nome, unidade, tipo_loja, tipo, cnpj, cidade, uf, status.</p>
+    <div class="form-actions">
+        <a class="button" href="/lojas">Cancelar</a>
+        <button class="button primary" type="submit">Gerar previa</button>
+    </div>
+</form>
+{% endblock %}

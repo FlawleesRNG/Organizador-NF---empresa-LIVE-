@@ -1,0 +1,20 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<header class="page-head"><div><h1>Editar loja</h1><p>Atualize os dados da unidade na base mestre.</p></div></header>
+{% if loja %}
+{% if erro %}<div class="alert error">{{ erro }}</div>{% endif %}
+<form class="form-card" method="post">
+    <label>Codigo da loja<input name="codigo_loja" value="{{ loja.codigo_loja or '' }}" placeholder="L164"></label>
+    <label>Unidade<input name="nome" required value="{{ loja.nome }}"></label>
+    <label>Tipo<input name="tipo_loja" value="{{ loja.tipo_loja or '' }}" placeholder="Loja Propria"></label>
+    <label>CNPJ<input name="cnpj" value="{{ loja.cnpj|cnpj if loja.cnpj else '' }}" placeholder="35.303.139/0037-08"></label>
+    <label>Cidade<input name="cidade" value="{{ loja.cidade or '' }}" placeholder="Sao Paulo"></label>
+    <label>UF<input name="uf" maxlength="2" value="{{ loja.uf or '' }}"></label>
+    <label class="check"><input type="checkbox" name="ativo" value="1" {% if loja.ativo %}checked{% endif %}> Loja ativa</label>
+    <p class="muted">Status atual: {{ loja.status_cadastro or 'OK' }}</p>
+    <div class="form-actions"><a class="button" href="/lojas">Cancelar</a><button class="button primary" type="submit">Salvar</button></div>
+</form>
+{% else %}
+<div class="alert error">Loja nao encontrada.</div>
+{% endif %}
+{% endblock %}

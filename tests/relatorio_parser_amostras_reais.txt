@@ -1,0 +1,33 @@
+RELATORIO TECNICO - PARSER DE AMOSTRAS REAIS
+
+Pasta: C:\TelemizaTeste\tests\amostras_reais
+PDFs encontrados: 2
+
+----------------------------------------
+Arquivo: UNIFIQUE - 04794627001 - 08 2026 BOLETO+NOTAS.pdf
+SHA-256: b14c8ae5a2c4afd473fd0e1c008a217439d31a0af5eb3cb0079946667d44ab65
+Operadora: UNIFIQUE
+CNPJ cliente: 05.108.435/0001-78
+CNPJ fornecedor: 02255187000108
+Valor: 189.90
+Vencimento: 2026-08-25
+Codigo cliente: 36264
+Codigo fatura/conta: 04794627001
+Numero fatura/cobranca: 57144230
+Parser utilizado: unifique
+Confianca: CNPJ=0.97; Valor=0.96; Vencimento=0.97; Codigo=0.93
+Avisos: Mais de um CNPJ encontrado
+----------------------------------------
+Arquivo: VIVO FIXO - 8999 2920 0608 - 08 2026 - BOLETO+NF.pdf
+SHA-256: 290cac384ef508ec159eca8eda4d04cb2a9f81c04f819fefaaacd63e77bb98e1
+Operadora: VIVO
+CNPJ cliente: 35.303.139/0037-08
+CNPJ fornecedor: 02558157000162
+Valor: 151.01
+Vencimento: 2026-08-20
+Codigo cliente: NAO IDENTIFICADO
+Codigo fatura/conta: 899929200608
+Numero fatura/cobranca: NAO IDENTIFICADO
+Parser utilizado: vivo
+Confianca: CNPJ=0.97; Valor=0.94; Vencimento=0.92; Codigo=0.96
+Avisos: Mais de um CNPJ encontrado

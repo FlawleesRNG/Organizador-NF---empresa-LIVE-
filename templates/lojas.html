@@ -1,0 +1,75 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<header class="page-head">
+    <div>
+        <h1>Lojas</h1>
+        <p>Base mestre de unidades para associacao por CNPJ.</p>
+    </div>
+    <div class="header-actions">
+        <a class="button" href="/lojas/importar">Importar CSV</a>
+        <a class="button" href="/lojas/exportar">Exportar CSV</a>
+        <a class="button primary" href="/lojas/nova">Nova loja</a>
+    </div>
+</header>
+
+{% if msg %}<div class="alert success">{{ msg }}</div>{% endif %}
+
+<form class="filters" method="get">
+    <label>Buscar
+        <input name="q" value="{{ filtro.q }}" placeholder="Codigo, unidade, CNPJ ou cidade">
+    </label>
+    <label>Tipo
+        <select name="tipo">
+            <option value="">Todos</option>
+            {% for item in tipos %}
+                <option value="{{ item.tipo_loja }}" {% if filtro.tipo == item.tipo_loja %}selected{% endif %}>{{ item.tipo_loja }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>UF
+        <select name="uf">
+            <option value="">Todas</option>
+            {% for item in ufs %}
+                <option value="{{ item.uf }}" {% if filtro.uf == item.uf %}selected{% endif %}>{{ item.uf }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>Status
+        <select name="status">
+            <option value="">Todos</option>
+            {% for item in statuses %}
+                <option value="{{ item.status_cadastro }}" {% if filtro.status == item.status_cadastro %}selected{% endif %}>{{ item.status_cadastro }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <button class="button" type="submit">Filtrar</button>
+    <a class="button ghost" href="/lojas">Limpar</a>
+</form>
+
+<div class="table-wrap">
+    <table>
+        <thead><tr><th>Codigo</th><th>Unidade</th><th>Tipo</th><th>CNPJ</th><th>Cidade</th><th>UF</th><th>Status</th><th>Acoes</th></tr></thead>
+        <tbody>
+        {% for loja in lojas %}
+            <tr>
+                <td>{{ loja.codigo_loja or "-" }}</td>
+                <td>{{ loja.nome }}</td>
+                <td>{{ loja.tipo_loja or "-" }}</td>
+                <td>{{ loja.cnpj|cnpj if loja.cnpj else "-" }}</td>
+                <td>{{ loja.cidade or "-" }}</td>
+                <td>{{ loja.uf }}</td>
+                <td><span class="badge {{ 'ok' if loja.status_cadastro == 'OK' else 'off' }}">{{ loja.status_cadastro }}</span></td>
+                <td class="actions">
+                    <a class="button" href="/lojas/{{ loja.id }}/editar">Editar</a>
+                    <form method="post" action="/lojas/{{ loja.id }}/alternar">
+                        <button class="button" type="submit">{{ "Desativar" if loja.ativo else "Ativar" }}</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8" class="empty">Nenhuma loja cadastrada.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

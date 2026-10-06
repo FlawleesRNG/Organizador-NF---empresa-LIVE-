@@ -1,0 +1,26 @@
+[
+  {
+    "arquivo": "tests/amostras_reais/VIVO FIXO - 8999 2920 0608 - 08 2026 - BOLETO+NF.pdf",
+    "cnpj": "35303139003708",
+    "codigo_loja": "L164",
+    "operadora": "VIVO"
+  },
+  {
+    "arquivo": "data/entrada/d34e51dfc1454c92bc32ed671a87a38d_4B TELECOM - 35.303.139-0066-34 - 10 2026 - BOLETO+NFCOM.pdf",
+    "cnpj": "35303139006634",
+    "codigo_loja": "L130",
+    "operadora": "4B TELECOM"
+  },
+  {
+    "arquivo": "data/entrada/51b4bb1ef69d4dd0ae2e50c1b55835b9_CACTA TELECOM - 10 2026 - BOLETO+NF.pdf",
+    "cnpj": "35303139008920",
+    "codigo_loja": "L321",
+    "operadora": "CACTA TELECOM"
+  },
+  {
+    "arquivo": "data/entrada/3d03b30f85f14acb92aa7dfa73a8f849_BLUE - BANDA LARGA 100MB - 10 2026- BOLETO+NF.pdf",
+    "cnpj": "35303139004852",
+    "codigo_loja": "L171",
+    "operadora": "BLUE"
+  }
+]

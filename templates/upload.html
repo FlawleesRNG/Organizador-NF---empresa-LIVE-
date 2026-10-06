@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-head">
+    <div>
+        <h1>Enviar fatura</h1>
+        <p>Envie um PDF individual ou um ZIP com vários PDFs. Loja e operadora serão identificadas automaticamente.</p>
+    </div>
+</header>
+{% if erro %}<div class="alert error">{{ erro }}</div>{% endif %}
+{% if msg %}<div class="alert success">{{ msg }}</div>{% endif %}
+<form class="form-card" method="post" enctype="multipart/form-data">
+    <label>Arquivo PDF ou ZIP
+        <input name="arquivo" type="file" accept="application/pdf,application/zip,.pdf,.zip" required>
+    </label>
+    <small>PDF: processa uma fatura. ZIP: processa todos os PDFs encontrados no lote, inclusive em subpastas.</small>
+    <div class="form-actions"><button class="button primary" type="submit">Processar arquivo</button></div>
+</form>
+{% endblock %}

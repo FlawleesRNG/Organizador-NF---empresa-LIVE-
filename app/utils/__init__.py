@@ -1,0 +1,1 @@
+"""Utilitarios da aplicacao."""

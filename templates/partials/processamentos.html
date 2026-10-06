@@ -1,0 +1,46 @@
+{% for f in processamentos %}
+<article class="processing-card status-{{ (f.comparativo_status or f.status or 'REVISAR')|status_badge }}">
+    <div class="processing-top">
+        <div>
+            {% set loja_nome = f.loja_nome_cadastro or f.nome_loja %}
+            {% set loja_uf = f.loja_uf_cadastro or f.uf_loja %}
+            {% set loja_codigo = f.loja_codigo_cadastro %}
+            <h3>
+                {% if loja_nome %}
+                    {{ (loja_codigo ~ " - ") if loja_codigo else "" }}{{ loja_nome }}{{ (" - " ~ loja_uf) if loja_uf else "" }}
+                {% else %}
+                    CNPJ NAO CADASTRADO
+                {% endif %}
+            </h3>
+            <p>{{ f.operadora or "-" }} · CNPJ {{ f.cnpj|cnpj }} · Valor {{ f.valor|valor_br if f.valor else "-" }}</p>
+        </div>
+        <span class="badge {{ (f.comparativo_status or f.status)|status_badge }}">{{ f.comparativo_status or f.status }}</span>
+    </div>
+    {% set comp = f.comparativo_json %}
+    {% if comp %}
+        {% set comparativo = comp|from_json %}
+        <table class="compare-table">
+            <thead><tr><th>Campo</th><th>E-mail</th><th>PDF</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for linha in comparativo.linhas %}
+                <tr>
+                    <td>{{ linha.campo }}</td>
+                    <td>{{ linha.email }}</td>
+                    <td>{{ linha.pdf }}</td>
+                    <td><span class="badge {{ linha.status|status_badge }}">{{ linha.status }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    <div class="email-meta">
+        <span>E-mail: {{ f.email_assunto or "-" }}</span>
+        <span>Recebido: {{ f.email_data or "-" }}</span>
+        {% if f.nome_arquivo_sugerido %}<span>Nome sugerido: {{ f.nome_arquivo_sugerido }}</span>{% endif %}
+    </div>
+</article>
+{% else %}
+<div class="table-wrap">
+    <p class="empty">Nenhum processamento da caixa compartilhada registrado ainda.</p>
+</div>
+{% endfor %}

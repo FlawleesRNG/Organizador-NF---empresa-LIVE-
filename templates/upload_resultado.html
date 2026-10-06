@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-head">
+    <div>
+        <h1>Resultado da importação</h1>
+        <p>Resumo do processamento do lote.</p>
+    </div>
+    <div class="form-actions"><a class="button" href="/faturas/upload">Importar outro arquivo</a><a class="button primary" href="/historico">Abrir histórico</a></div>
+</header>
+
+<section class="metrics batch-metrics">
+    <article><span>{{ resumo.encontrados }}</span><p>PDFs encontrados</p></article>
+    <article><span>{{ resumo.processados }}</span><p>Processados</p></article>
+    <article><span>{{ resumo.duplicados }}</span><p>Duplicados</p></article>
+    <article><span>{{ resumo.revisao }}</span><p>Para revisão</p></article>
+    <article><span>{{ resumo.erros }}</span><p>Erros</p></article>
+</section>
+
+<div class="table-wrap batch-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Arquivo</th><th>Operadora</th><th>CNPJ LIVE!</th><th>Loja</th><th>Cidade / UF</th><th>Status</th><th>Detalhe</th><th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in resultados %}
+            <tr>
+                <td>{{ item.arquivo }}</td>
+                <td>{{ item.operadora or "-" }}</td>
+                <td>{{ item.cnpj|cnpj if item.cnpj else "-" }}</td>
+                <td>{{ item.loja or "-" }}</td>
+                <td>{{ item.cidade_uf or "-" }}</td>
+                <td><span class="badge {{ item.status|status_badge }}">{{ item.status }}</span></td>
+                <td>{{ item.motivo or "OK" }}</td>
+                <td>
+                    {% if item.fatura_id and item.status in ["PROCESSADO", "ARQUIVADA", "REVISAR", "DUPLICADO"] %}
+                        <a class="button" href="/faturas/{{ item.fatura_id }}/revisar">Abrir</a>
+                    {% else %}-{% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

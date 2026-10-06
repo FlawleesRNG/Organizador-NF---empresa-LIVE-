@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-head">
+    <div>
+        <h1>Dashboard</h1>
+        <p>Processamentos da caixa compartilhada e visão geral do sistema.</p>
+    </div>
+    <a class="button primary" href="/faturas/upload">Enviar fatura manual</a>
+</header>
+
+<section class="metrics">
+    <article><span>{{ dados.lojas }}</span><p>Lojas cadastradas</p></article>
+    <article><span>{{ dados.faturas }}</span><p>Faturas registradas</p></article>
+    <article><span>{{ dados.arquivadas }}</span><p>Faturas arquivadas</p></article>
+    <article><span>{{ dados.revisar }}</span><p>Faturas para revisar</p></article>
+</section>
+
+<section class="mail-status">
+    <div>
+        <h2>Caixa compartilhada</h2>
+        <p id="graph-status">{{ graph.mensagem }}</p>
+    </div>
+    {% if graph.shared_mailbox %}<span class="chip">{{ graph.shared_mailbox }}</span>{% endif %}
+</section>
+
+<section class="process-section">
+    <div class="section-head">
+        <h2>Processamentos da caixa compartilhada</h2>
+        <small>Atualização automática a cada 25 segundos.</small>
+    </div>
+    <div id="processamentos-lista" class="processing-list">
+        {% include "partials/processamentos.html" %}
+    </div>
+</section>
+
+<section class="shortcuts">
+    <a href="/faturas/upload">Enviar Fatura Manual</a>
+    <a href="/lojas">Lojas</a>
+    <a href="/historico">Histórico</a>
+    <a href="/revisar">Revisar</a>
+</section>
+{% endblock %}
