@@ -167,6 +167,33 @@ th { background: #f8fafc; color: #465366; font-size: 13px; text-transform: upper
 
 .review-card { padding: 18px; margin-bottom: 16px; display: grid; gap: 8px; }
 .danger-text { color: var(--danger); }
+.audit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    gap: 16px;
+}
+.audit-card h2 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+.audit-list {
+    margin: 8px 0 0;
+    padding-left: 20px;
+    color: var(--muted);
+}
+.audit-table {
+    box-shadow: none;
+    border-radius: 6px;
+}
+.audit-table table {
+    min-width: 720px;
+}
+.chip-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
 .filters {
     display: grid;
     grid-template-columns: repeat(4, minmax(150px, 1fr)) auto auto;
@@ -263,6 +290,7 @@ th { background: #f8fafc; color: #465366; font-size: 13px; text-transform: upper
     .metrics { grid-template-columns: repeat(2, 1fr); }
     .page-head { align-items: flex-start; flex-direction: column; }
     .filters { grid-template-columns: 1fr; }
+    .audit-grid { grid-template-columns: 1fr; }
 }
 
 .batch-metrics { grid-template-columns: repeat(5, minmax(130px, 1fr)); margin-bottom: 22px; }

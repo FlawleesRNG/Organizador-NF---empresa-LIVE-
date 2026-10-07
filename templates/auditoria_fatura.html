@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-head">
+    <div>
+        <h1>Auditoria da fatura</h1>
+        <p>Veja por que o sistema vinculou esta nota à loja e quais dados foram extraídos.</p>
+    </div>
+    <div class="actions">
+        <a class="button" href="/historico">Voltar ao histórico</a>
+        {% if fatura and fatura.caminho_final %}
+            <a class="button ghost" href="/faturas/{{ fatura.id }}/arquivo" target="_blank">Abrir PDF</a>
+        {% endif %}
+    </div>
+</header>
+
+{% if fatura %}
+<section class="audit-grid">
+    <article class="review-card audit-card">
+        <h2>Resumo da decisão</h2>
+        <p><strong>Arquivo:</strong> {{ fatura.arquivo_original }}</p>
+        <p><strong>Status:</strong> <span class="badge {{ fatura.status|status_badge }}">{{ fatura.status }}</span></p>
+        <p><strong>Resultado da loja:</strong> {{ fatura.resultado_identificacao_loja or "-" }}</p>
+        <p><strong>Método:</strong>
+            {% if fatura.metodo_identificacao_loja == "CNPJ_EXATO" %}
+                <span class="badge ok">CNPJ_EXATO</span>
+            {% elif fatura.metodo_identificacao_loja == "DADOS_DOCUMENTO_UNICO" %}
+                <span class="badge revisar">DADOS DA NOTA</span>
+            {% else %}
+                {{ fatura.metodo_identificacao_loja or "-" }}
+            {% endif %}
+        </p>
+        {% if auditoria.observacao %}
+            <p><strong>Observação:</strong> {{ auditoria.observacao }}</p>
+        {% endif %}
+        {% if auditoria.sinais_identificacao_loja %}
+            <p><strong>Sinais usados:</strong> {{ auditoria.sinais_identificacao_loja }}</p>
+        {% endif %}
+        {% if motivos %}
+            <div>
+                <strong>Pontos para revisão:</strong>
+                <ul class="audit-list">
+                    {% for item in motivos %}<li>{{ item }}</li>{% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </article>
+
+    <article class="review-card audit-card">
+        <h2>Loja vinculada</h2>
+        {% if fatura.loja_nome %}
+            <p><strong>Loja:</strong> {{ (fatura.loja_codigo ~ " - ") if fatura.loja_codigo else "" }}{{ fatura.loja_nome }}</p>
+            <p><strong>CNPJ da loja na base:</strong> {{ fatura.loja_cnpj|cnpj if fatura.loja_cnpj else "-" }}</p>
+            <p><strong>Cidade/UF:</strong> {{ ((fatura.loja_cidade ~ "/") if fatura.loja_cidade else "") ~ (fatura.loja_uf or "-") }}</p>
+            {% if fatura.loja_razao_social %}
+                <p><strong>Razão social na base:</strong> {{ fatura.loja_razao_social }}</p>
+            {% endif %}
+            <p><strong>Validação cidade:</strong> {{ "OK" if fatura.validacao_cidade else "Nao registrada" }}</p>
+            <p><strong>Validação UF:</strong> {{ "OK" if fatura.validacao_uf else "Nao registrada" }}</p>
+        {% else %}
+            <p class="danger-text"><strong>Nenhuma loja vinculada.</strong></p>
+        {% endif %}
+    </article>
+</section>
+
+<section class="review-card audit-card">
+    <h2>Campos extraídos da nota</h2>
+    <div class="table-wrap audit-table">
+        <table>
+            <thead>
+                <tr><th>Campo</th><th>Valor</th><th>Origem/regra</th><th>Confiança</th></tr>
+            </thead>
+            <tbody>
+                {% for campo in campos %}
+                    <tr>
+                        <td>{{ campo.rotulo }}</td>
+                        <td>
+                            {% if campo.tipo == "valor" and campo.valor %}
+                                {{ campo.valor|valor_br }}
+                            {% elif campo.tipo == "data" and campo.valor != "-" %}
+                                {{ campo.valor|data_br }}
+                            {% else %}
+                                {{ campo.valor }}
+                            {% endif %}
+                        </td>
+                        <td>{{ campo.origem }}</td>
+                        <td>{% if campo.confianca is not none %}{{ ((campo.confianca or 0) * 100)|round|int }}%{% else %}-{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="audit-grid">
+    <article class="review-card audit-card">
+        <h2>Dados complementares</h2>
+        <p><strong>Razão social extraída:</strong> {{ fatura.razao_social or "-" }}</p>
+        <p><strong>Código do cliente:</strong> {{ fatura.codigo_cliente or "-" }}</p>
+        <p><strong>Número da fatura/NF:</strong> {{ fatura.numero_fatura or "-" }}</p>
+        <p><strong>Referência:</strong> {{ fatura.referencia or "-" }}</p>
+        <p><strong>CNPJ fornecedor:</strong> {{ fatura.cnpj_fornecedor|cnpj if fatura.cnpj_fornecedor else "-" }}</p>
+        <p><strong>Parser usado:</strong> {{ fatura.parser_utilizado or "generico" }}</p>
+    </article>
+
+    <article class="review-card audit-card">
+        <h2>CNPJs e avisos</h2>
+        {% if outros_cnpjs %}
+            <p><strong>Outros CNPJs detectados:</strong></p>
+            <div class="chip-list">
+                {% for item in outros_cnpjs %}
+                    <span class="chip">{{ item.cnpj|cnpj }}{% if item.classificacao %} - {{ item.classificacao }}{% endif %}</span>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p><strong>Outros CNPJs detectados:</strong> -</p>
+        {% endif %}
+        {% if avisos %}
+            <p><strong>Avisos do parser:</strong></p>
+            <ul class="audit-list">
+                {% for item in avisos %}<li>{{ item }}</li>{% endfor %}
+            </ul>
+        {% else %}
+            <p><strong>Avisos do parser:</strong> -</p>
+        {% endif %}
+        {% if auditoria.observacoes_base %}
+            <p><strong>Observações da identificação:</strong></p>
+            <ul class="audit-list">
+                {% for item in auditoria.observacoes_base %}<li>{{ item }}</li>{% endfor %}
+            </ul>
+        {% endif %}
+    </article>
+</section>
+{% else %}
+<div class="alert error">Fatura nao encontrada.</div>
+{% endif %}
+{% endblock %}

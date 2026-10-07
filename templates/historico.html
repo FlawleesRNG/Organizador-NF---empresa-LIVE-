@@ -65,6 +65,7 @@
                     {% endif %}
                 </td>
                 <td class="actions">
+                    <a class="button ghost" href="/faturas/{{ f.id }}/auditoria">Auditoria</a>
                     {% if f.caminho_final %}
                         <a class="button" href="/faturas/{{ f.id }}/arquivo" target="_blank">Abrir PDF</a>
                         <a class="button ghost" href="/faturas/{{ f.id }}/download">Baixar</a>

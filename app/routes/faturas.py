@@ -74,6 +74,13 @@ def _json_lista(valor) -> str:
     return json.dumps(valor or [], ensure_ascii=False)
 
 
+def _carregar_json(valor, padrao):
+    try:
+        return json.loads(valor or "")
+    except (TypeError, json.JSONDecodeError):
+        return padrao
+
+
 def _motivos_confianca(dados: dict) -> list[str]:
     motivos = []
     confianca = dados.get("confianca", {})
@@ -437,6 +444,82 @@ def revisar_fatura(request: Request, fatura_id: int, msg: str = ""):
         request,
         "revisar.html",
         {"fatura": fatura, "loja": loja, "cnpjs": cnpjs, "outros_cnpjs": outros_cnpjs, "msg": msg, "erro": ""},
+    )
+
+
+@router.get("/faturas/{fatura_id}/auditoria")
+def auditoria_fatura(request: Request, fatura_id: int, msg: str = ""):
+    with conectar() as conn:
+        fatura = conn.execute(
+            """
+            SELECT f.*, l.codigo_loja loja_codigo, l.nome loja_nome, l.cnpj loja_cnpj,
+                   l.cidade loja_cidade, l.uf loja_uf, l.razao_social loja_razao_social
+            FROM faturas f
+            LEFT JOIN lojas l ON l.id = f.loja_id
+            WHERE f.id = ?
+            """,
+            (fatura_id,),
+        ).fetchone()
+
+    if not fatura:
+        return request.app.state.templates.TemplateResponse(
+            request,
+            "auditoria_fatura.html",
+            {"fatura": None, "msg": msg, "erro": "Fatura nao encontrada."},
+            status_code=404,
+        )
+
+    auditoria = _carregar_json(fatura["auditoria_loja_json"], {})
+    outros_cnpjs = _carregar_json(fatura["outros_cnpjs"], [])
+    avisos = _carregar_json(fatura["avisos_parser"], [])
+    motivos = [item.strip() for item in (fatura["motivo_revisao"] or "").split(";") if item.strip()]
+    campos = [
+        {
+            "rotulo": "CNPJ da nota",
+            "valor": formatar_cnpj(fatura["cnpj"]) if fatura["cnpj"] else "-",
+            "origem": fatura["origem_cnpj"] or auditoria.get("origem_cnpj") or "-",
+            "confianca": fatura["confianca_cnpj"],
+        },
+        {
+            "rotulo": "Operadora",
+            "valor": fatura["operadora"] or "-",
+            "origem": fatura["origem_operadora"] or "-",
+            "confianca": fatura["confianca_operadora"],
+        },
+        {
+            "rotulo": "Valor",
+            "valor": fatura["valor"],
+            "origem": fatura["origem_valor"] or "-",
+            "confianca": fatura["confianca_valor"],
+            "tipo": "valor",
+        },
+        {
+            "rotulo": "Vencimento",
+            "valor": fatura["vencimento"] or "-",
+            "origem": fatura["origem_vencimento"] or "-",
+            "confianca": fatura["confianca_vencimento"],
+            "tipo": "data",
+        },
+        {
+            "rotulo": "Codigo da fatura",
+            "valor": fatura["codigo_fatura"] or "-",
+            "origem": fatura["origem_codigo"] or "-",
+            "confianca": fatura["confianca_codigo"],
+        },
+    ]
+    return request.app.state.templates.TemplateResponse(
+        request,
+        "auditoria_fatura.html",
+        {
+            "fatura": fatura,
+            "auditoria": auditoria,
+            "campos": campos,
+            "outros_cnpjs": outros_cnpjs,
+            "avisos": avisos,
+            "motivos": motivos,
+            "msg": msg,
+            "erro": "",
+        },
     )
 
 
