@@ -17,6 +17,7 @@ from app.services.arquivamento import caminho_arquivado, caminho_revisar, mover_
 from app.services.cnpj_utils import identificar_cnpjs_live, motivo_cnpj_live_nao_cadastrado
 from app.services.operator_detector import detectar_operadora
 from app.services.pdf_parser import extrair_texto_pdf, parsear_texto
+from app.services.secondary_store_resolver import resolver_loja_por_dados_documento
 from app.services.store_resolver import MATCH_CONFIRMADO, auditar_base_mestre, resolver_loja_por_cnpj_live
 from app.utils.formatadores import (
     formatar_cnpj,
@@ -273,6 +274,15 @@ def _processar_pdf(nome_original: str, conteudo: bytes) -> dict:
     cnpj = dados.get("cnpj", "")
     with conectar() as conn:
         resolucao_loja = resolver_loja_por_cnpj_live(conn, texto, cnpj)
+        if not resolucao_loja.confirmado:
+            resolucao_secundaria = resolver_loja_por_dados_documento(
+                conn,
+                texto,
+                resolucao_loja.cnpj_encontrado or cnpj,
+                resolucao_loja.motivo,
+            )
+            if resolucao_secundaria and resolucao_secundaria.confirmado:
+                resolucao_loja = resolucao_secundaria
         loja = resolucao_loja.loja if resolucao_loja.confirmado else None
         cnpj = resolucao_loja.cnpj_encontrado or cnpj
         if resolucao_loja.auditoria.get("origem_cnpj"):
@@ -285,6 +295,8 @@ def _processar_pdf(nome_original: str, conteudo: bytes) -> dict:
             motivos.extend(resolucao_loja.conflitos)
         loja_para_validacao = resolucao_loja.loja if cnpj else None
         motivos.extend(_motivos(cnpj, loja_para_validacao, dados.get("operadora", ""), dados.get("valor", ""), dados.get("vencimento", "")))
+        if resolucao_loja.confirmado and resolucao_loja.metodo_identificacao_loja == "DADOS_DOCUMENTO_UNICO":
+            motivos = [motivo for motivo in motivos if motivo != "CNPJ da loja nao identificado"]
         motivos = list(dict.fromkeys(motivos))
         if motivos:
             destino_final = mover_pdf(caminho_temp, caminho_revisar(nome_original))
@@ -590,6 +602,15 @@ def reprocessar(fatura_id: int):
         dados = _ajustar_identidade_automatica(parsear_texto(texto), texto, fatura["arquivo_original"] or caminho.name)
         cnpj = dados.get("cnpj", "")
         resolucao_loja = resolver_loja_por_cnpj_live(conn, texto, cnpj)
+        if not resolucao_loja.confirmado:
+            resolucao_secundaria = resolver_loja_por_dados_documento(
+                conn,
+                texto,
+                resolucao_loja.cnpj_encontrado or cnpj,
+                resolucao_loja.motivo,
+            )
+            if resolucao_secundaria and resolucao_secundaria.confirmado:
+                resolucao_loja = resolucao_secundaria
         loja = resolucao_loja.loja if resolucao_loja.confirmado else None
         cnpj = resolucao_loja.cnpj_encontrado or cnpj
         if resolucao_loja.auditoria.get("origem_cnpj"):
@@ -602,6 +623,8 @@ def reprocessar(fatura_id: int):
             motivos.extend(resolucao_loja.conflitos)
         loja_para_validacao = resolucao_loja.loja if cnpj else None
         motivos.extend(_motivos(cnpj, loja_para_validacao, dados.get("operadora", ""), dados.get("valor", ""), dados.get("vencimento", "")))
+        if resolucao_loja.confirmado and resolucao_loja.metodo_identificacao_loja == "DADOS_DOCUMENTO_UNICO":
+            motivos = [motivo for motivo in motivos if motivo != "CNPJ da loja nao identificado"]
         motivos = list(dict.fromkeys(motivos))
         if motivos:
             novo_status = STATUS_REVISAR
