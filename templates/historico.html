@@ -19,7 +19,7 @@
 </form>
 <div class="table-wrap">
     <table>
-        <thead><tr><th>Data processamento</th><th>Arquivo</th><th>Loja</th><th>Cidade/UF</th><th>CNPJ LIVE!</th><th>Operadora</th><th>Valor</th><th>Vencimento</th><th>Codigo</th><th>Status</th><th>Acoes</th></tr></thead>
+        <thead><tr><th>Data processamento</th><th>Arquivo</th><th>Loja</th><th>Cidade/UF</th><th>CNPJ da nota</th><th>Operadora</th><th>Valor</th><th>Vencimento</th><th>Codigo</th><th>Status</th><th>Auditoria</th><th>Acoes</th></tr></thead>
         <tbody>
         {% for f in faturas %}
             <tr>
@@ -33,6 +33,20 @@
                 <td>{{ f.vencimento|data_br if f.vencimento else "-" }}</td>
                 <td>{{ f.codigo_fatura or "-" }}</td>
                 <td><span class="badge {{ f.status|status_badge }}">{{ f.status }}</span></td>
+                <td>
+                    {% if f.metodo_identificacao_loja == "DADOS_DOCUMENTO_UNICO" %}
+                        {% set audit = f.auditoria_loja_json|from_json %}
+                        <span class="badge revisar">DADOS DA NOTA</span>
+                        <div class="muted">Loja identificada por endereço/unidade do documento.</div>
+                        {% if audit.conflitos %}
+                            <div class="muted">{{ audit.conflitos|join("; ") }}</div>
+                        {% endif %}
+                    {% elif f.metodo_identificacao_loja %}
+                        <span class="badge ok">{{ f.metodo_identificacao_loja }}</span>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
                 <td class="actions">
                     {% if f.caminho_final %}
                         <a class="button" href="/faturas/{{ f.id }}/arquivo" target="_blank">Abrir PDF</a>
@@ -46,7 +60,7 @@
                 </td>
             </tr>
         {% else %}
-            <tr><td colspan="11" class="empty">Nenhum registro encontrado.</td></tr>
+            <tr><td colspan="12" class="empty">Nenhum registro encontrado.</td></tr>
         {% endfor %}
         </tbody>
     </table>
