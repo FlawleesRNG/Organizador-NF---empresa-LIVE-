@@ -27,7 +27,9 @@ CNPJ_RE = re.compile(r"(?<!\d)\d{2}[\s./-]*\d{3}[\s./-]*\d{3}[\s./-]*\d{4}[\s./-
 DATA_RE = re.compile(r"\b\d{2}[/-]\d{2}[/-]\d{4}\b")
 VALOR_RE = re.compile(r"(?:R\$\s*)?\d{1,3}(?:\.\d{3})*,\d{2}\b")
 CODIGO_RE = re.compile(
-    r"(?:codigo\s+(?:da\s+|do\s+)?(?:fatura|cliente)|cod\.\s*fatura|numero\s+da\s+fatura|n[ºo]\s+da\s+fatura|fatura\s+n[ºo]|referencia|identificador|conta)\s*[:\-]?\s*([A-Za-z0-9.\-\/]+)",
+    r"\b(?:codigo|código|cod\.?)\s+(?:da\s+|do\s+|de\s+)?(?:fatura|cliente|contrato|net)\b\s*[:\-]?\s*([A-Za-z0-9.\-\/]+)"
+    r"|\b(?:numero|número|n[º°o])\s+(?:da\s+|do\s+|de\s+)?(?:fatura|documento|contrato)\b\s*[:\-]?\s*([A-Za-z0-9.\-\/]+)"
+    r"|\b(?:fatura\s+n[º°o]|referencia|referência|identificador|id\s+titulo\s+referencia|id\s+título\s+referência|nr\.?\s+contrato)\b\s*[:\-]?\s*([A-Za-z0-9.\-\/]+)",
     re.IGNORECASE,
 )
 
@@ -98,6 +100,29 @@ def trecho_ao_redor(texto: str, inicio: int, tamanho: int = 120) -> str:
     ini = max(0, inicio - tamanho)
     fim = min(len(texto), inicio + tamanho)
     return re.sub(r"\s+", " ", texto[ini:fim]).strip()
+
+
+def _codigo_extraido(match: re.Match[str]) -> str:
+    for grupo in match.groups():
+        if grupo:
+            return grupo.strip()
+    return match.group(0).strip()
+
+
+def _codigo_valido(valor: str) -> bool:
+    codigo = (valor or "").strip().strip(":;-")
+    if not codigo or len(codigo) < 3:
+        return False
+    if not re.search(r"\d", codigo):
+        return False
+    if re.fullmatch(r"[xX./\-\s0]+", codigo):
+        return False
+    palavras_ruins = {"de", "do", "da", "te", "em", "para", "lmente", "automatico", "automático"}
+    return codigo.lower() not in palavras_ruins
+
+
+def _limpar_codigo(valor: str) -> str:
+    return re.sub(r"\s+", "", (valor or "").strip().strip(":;-"))[:80]
 
 
 class ParserGenerico:
@@ -200,7 +225,7 @@ class ParserGenerico:
         for idx, linha in enumerate(linhas):
             linha_norm = sem_acentos(linha).lower()
             if any(rotulo in linha_norm for rotulo in rotulos):
-                bloco = " ".join(linhas[idx : idx + 3])
+                bloco = " ".join(linhas[idx : idx + 6])
                 achado = regex.search(bloco)
                 if achado:
                     valor = achado.group(1) if achado.groups() else achado.group(0)
@@ -220,20 +245,64 @@ class ParserGenerico:
         return normalizar_data(valor), conf if valor else 0.0, origem
 
     def identificar_valor(self, texto: str) -> tuple[str, float, str]:
-        valor, conf, origem = self._campo_por_rotulo(
-            texto,
-            ["valor total", "valor a pagar", "total a pagar", "valor da fatura", "total"],
-            VALOR_RE,
-        )
-        return normalizar_valor(valor), conf if valor else 0.0, origem
+        grupos_prioridade = [
+            ["total a pagar", "valor da fatura", "valor liquido da nota", "valor líquido da nota"],
+            ["valor"],
+            ["valor total", "valor total nf", "valor total nff"],
+            ["valor do documento", "valor documento", "valor cobrado"],
+        ]
+        linhas = limpar_linhas(texto)
+        for rotulos in grupos_prioridade:
+            for idx, linha in enumerate(linhas):
+                linha_norm = sem_acentos(linha).lower()
+                if not any(rotulo in linha_norm for rotulo in rotulos):
+                    continue
+                if rotulos == ["valor"] and linha_norm != "valor":
+                    continue
+                bloco = " ".join(linhas[idx : idx + 8])
+                for achado in VALOR_RE.finditer(bloco):
+                    valor_norm = normalizar_valor(achado.group(0))
+                    if valor_norm:
+                        return valor_norm, 0.94, f'Encontrado proximo de "{linha[:60]}"'
+
+        for achado in VALOR_RE.finditer(texto):
+            valor_norm = normalizar_valor(achado.group(0))
+            if valor_norm:
+                return valor_norm, 0.55, "Encontrado por busca generica"
+        return "", 0.0, "Nao encontrado"
 
     def identificar_codigo_fatura(self, texto: str) -> tuple[str, float, str]:
-        valor, conf, origem = self._campo_por_rotulo(
-            texto,
-            ["codigo da fatura", "codigo fatura", "numero da fatura", "nº da fatura", "fatura nº", "referencia", "identificador"],
-            CODIGO_RE,
-        )
-        return valor.strip()[:80], conf if valor else 0.0, origem
+        linhas = limpar_linhas(texto)
+        grupos_prioridade = [
+            ["codigo net", "código net", "nr. contrato", "nr contrato", "nº do contrato", "numero do contrato", "número do contrato", "id titulo referencia", "id título referência"],
+            ["codigo da fatura", "código da fatura", "numero da fatura", "número da fatura", "nº da fatura", "fatura nº", "codigo fatura", "código fatura"],
+            ["numero do documento", "número do documento", "nº documento", "recibo", "codigo do cliente", "código do cliente"],
+            ["referencia", "referência", "identificador"],
+            ["codigo", "código", "contrato", "documento"],
+        ]
+        for rotulos in grupos_prioridade:
+            for idx, linha in enumerate(linhas):
+                linha_norm = sem_acentos(linha).lower()
+                if not any(rotulo in linha_norm for rotulo in rotulos):
+                    continue
+                if "nfs-e" in linha_norm or "nfse" in linha_norm:
+                    continue
+                bloco = " ".join(linhas[idx : idx + 4])
+                for achado in CODIGO_RE.finditer(bloco):
+                    valor = _limpar_codigo(_codigo_extraido(achado))
+                    if _codigo_valido(valor):
+                        return valor, 0.94, f'Encontrado proximo de "{linha[:60]}"'
+                if re.fullmatch(r"(?:codigo|código|n[º°o]\s*documento|numero\s+do\s+documento|número\s+do\s+documento|nr\.?\s+contrato)", linha_norm):
+                    for candidata in linhas[idx + 1 : idx + 5]:
+                        valor = _limpar_codigo(candidata)
+                        if _codigo_valido(valor):
+                            return valor, 0.90, f'Encontrado apos "{linha[:60]}"'
+
+        for achado in CODIGO_RE.finditer(texto):
+            valor = _limpar_codigo(_codigo_extraido(achado))
+            if _codigo_valido(valor):
+                return valor, 0.55, "Encontrado por busca generica"
+        return "", 0.0, "Nao encontrado"
 
     def identificar_razao_social(self, texto: str) -> str:
         linhas = limpar_linhas(texto)

@@ -5,6 +5,7 @@ import zipfile
 from app.routes.faturas import _ajustar_identidade_automatica, _extrair_pdfs_zip
 from app.services.cnpj_utils import identificar_cnpjs_live
 from app.services.operator_detector import detectar_operadora
+from app.services.parsers.base import ParserGenerico
 
 
 class UploadLoteTests(unittest.TestCase):
@@ -78,6 +79,49 @@ class UploadLoteTests(unittest.TestCase):
         for texto, esperado in casos.items():
             with self.subTest(texto=texto):
                 self.assertEqual(detectar_operadora(texto).operadora, esperado)
+
+    def test_parser_generico_evita_codigos_de_palavras_soltas(self):
+        texto = """
+        Instrucoes de responsabilidade do beneficiario. Qualquer duvida contate o beneficiario.
+        ID titulo referencia - 62319
+        N° Identificador de debito automatico
+        """
+        codigo, confianca, _ = ParserGenerico().identificar_codigo_fatura(texto)
+        self.assertEqual(codigo, "62319")
+        self.assertGreaterEqual(confianca, 0.9)
+
+    def test_parser_generico_prioriza_total_a_pagar_sobre_boleto_agregado(self):
+        texto = """
+        Valor do Documento
+        R$590,00
+        VENCIMENTO: 17/10/2026
+        TOTAL A PAGAR: R$ 91,45
+        CPF/CNPJ: 35.303.139/0085-05
+        """
+        valor, confianca, _ = ParserGenerico().identificar_valor(texto)
+        self.assertEqual(valor, "91.45")
+        self.assertGreaterEqual(confianca, 0.9)
+
+    def test_parser_generico_ler_valor_e_codigo_claro_net(self):
+        texto = """
+        Cliente
+        LIVE STORE BRASIL COMERCIO DE ROUPAS LTD
+        Codigo
+        162/380235099
+        Vencimento
+        15/10/2026
+        Valor
+        155,87
+        CPF/CNPJ
+        35.303.139/0115-57
+        VALOR DA NOTA FISCAL:
+        130,89
+        """
+        parser = ParserGenerico()
+        valor, _, _ = parser.identificar_valor(texto)
+        codigo, _, _ = parser.identificar_codigo_fatura(texto)
+        self.assertEqual(valor, "155.87")
+        self.assertEqual(codigo, "162/380235099")
 
 
 if __name__ == "__main__":
