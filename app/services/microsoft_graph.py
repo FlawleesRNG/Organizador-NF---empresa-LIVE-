@@ -52,7 +52,7 @@ class MicrosoftGraphClient:
         result = self.app.acquire_token_for_client(scopes=SCOPES)
         token = result.get("access_token")
         if not token:
-            raise RuntimeError("Nao foi possivel adquirir token Microsoft Graph")
+            raise RuntimeError("Não foi possível adquirir token Microsoft Graph")
         return token
 
     async def _get(self, path_or_url: str, params: dict | None = None) -> dict:

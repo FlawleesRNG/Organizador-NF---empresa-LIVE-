@@ -31,10 +31,10 @@ class ParserVivo(ParserGenerico):
                     origem = "Encontrado em area da prestadora/emitente"
                 if not validar_cnpj(cnpj):
                     score = min(score, 0.55)
-                    origem += "; digitos verificadores invalidos"
+                    origem += "; dígitos verificadores inválidos"
                 candidatos.append((cnpj, max(0.0, min(1.0, score)), origem))
         candidatos.sort(key=lambda item: item[1], reverse=True)
-        return candidatos[0] if candidatos else ("", 0.0, "CNPJ do cliente nao encontrado")
+        return candidatos[0] if candidatos else ("", 0.0, "CNPJ do cliente não encontrado")
 
     def parse(self, texto: str):
         resultado = super().parse(texto)
@@ -47,7 +47,7 @@ class ParserVivo(ParserGenerico):
         texto_norm = sem_acentos(texto)
         conta = re.search(r"numero\s+da\s+conta\s*:?\s*([0-9]{10,14})", texto_norm, re.IGNORECASE)
         if conta:
-            return conta.group(1), 0.96, 'Encontrado proximo de "Numero da Conta"'
+            return conta.group(1), 0.96, 'Encontrado próximo de "Número da Conta"'
         return super().identificar_codigo_fatura(texto)
 
     def identificar_valor(self, texto: str) -> tuple[str, float, str]:

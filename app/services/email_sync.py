@@ -89,12 +89,12 @@ def _ajustar_identidade_pdf(dados_pdf: dict, texto: str, nome_arquivo: str) -> d
         dados_pdf["origem"]["operadora"] = "Identificada automaticamente pelo conteudo do PDF"
     elif not dados_pdf.get("operadora"):
         dados_pdf["operadora"] = ""
-        dados_pdf["origem"]["operadora"] = "Operadora nao identificada automaticamente"
+        dados_pdf["origem"]["operadora"] = "Operadora não identificada automaticamente"
     return dados_pdf
 
 
 def _nome_sugerido(loja, dados_pdf: dict) -> str:
-    loja_txt = nome_exibicao_loja(loja) if loja else "CNPJ NAO CADASTRADO"
+    loja_txt = nome_exibicao_loja(loja) if loja else "CNPJ NÃO CADASTRADO"
     partes = [
         loja_txt,
         dados_pdf.get("operadora") or "OPERADORA",

@@ -62,11 +62,11 @@ def identificar_cnpj_live(texto: str) -> tuple[str, float, str]:
         origem = "Identificado pelo prefixo CNPJ LIVE! 35.303.139"
         if validar_cnpj(cnpj):
             return cnpj, 0.99, origem
-        return cnpj, 0.70, f"{origem}; digitos verificadores invalidos"
+        return cnpj, 0.70, f"{origem}; dígitos verificadores inválidos"
     if len(live) > 1:
         return "", 0.45, "Mais de um CNPJ LIVE! encontrado no documento"
-    return "", 0.0, "CNPJ da loja LIVE! nao identificado no documento."
+    return "", 0.0, "CNPJ da loja LIVE! não identificado no documento."
 
 
 def motivo_cnpj_live_nao_cadastrado(cnpj: str) -> str:
-    return f"CNPJ LIVE! identificado, porem nao encontrado na base de lojas: {formatar_cnpj(cnpj)}"
+    return f"CNPJ LIVE! identificado, porém não encontrado na base de lojas: {formatar_cnpj(cnpj)}"

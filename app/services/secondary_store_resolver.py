@@ -119,10 +119,10 @@ def resolver_loja_por_dados_documento(conn: Connection, texto: str, cnpj_live: s
         validacao_cidade=True,
         validacao_uf=True,
         auditoria={
-            "origem_cnpj": "CNPJ informado no documento" if cnpj else "CNPJ LIVE! nao identificado",
+            "origem_cnpj": "CNPJ informado no documento" if cnpj else "CNPJ LIVE! não identificado",
             "confianca_cnpj": 0.99 if cnpj else 0.0,
             "sinais_identificacao_loja": regra["nome"],
-            "observacao": "Nota real prevaleceu por unidade/endereco extraidos do documento.",
+            "observacao": "Nota real prevaleceu por unidade/endereço extraídos do documento.",
             "observacoes_base": observacoes_base,
         },
     )

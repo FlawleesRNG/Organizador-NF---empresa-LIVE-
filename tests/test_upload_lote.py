@@ -65,7 +65,7 @@ class UploadLoteTests(unittest.TestCase):
         bio = io.BytesIO()
         with zipfile.ZipFile(bio, "w") as zf:
             zf.writestr("readme.txt", b"sem pdf")
-        with self.assertRaisesRegex(ValueError, "nao contem arquivos PDF"):
+        with self.assertRaisesRegex(ValueError, "não contém arquivos PDF"):
             _extrair_pdfs_zip(bio.getvalue())
 
     def test_operadoras_reais_do_lote_sao_detectadas(self):

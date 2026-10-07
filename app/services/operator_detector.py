@@ -73,7 +73,7 @@ def detectar_operadora(texto: str, nome_arquivo: str = "") -> OperadoraDetectada
     candidatos = _candidatos(texto, "conteudo do PDF", 0.90)
     candidatos += _candidatos(nome_arquivo, "nome do arquivo", 0.78)
     if not candidatos:
-        return OperadoraDetectada("", 0.0, "NAO_IDENTIFICADA", "Operadora nao identificada com seguranca")
+        return OperadoraDetectada("", 0.0, "NAO_IDENTIFICADA", "Operadora não identificada com segurança")
 
     por_operadora: dict[str, OperadoraDetectada] = {}
     for candidato in candidatos:

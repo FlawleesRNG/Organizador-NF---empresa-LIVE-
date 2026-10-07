@@ -41,15 +41,15 @@ MAX_ZIP_UNCOMPRESSED_BYTES = 500 * 1024 * 1024
 
 def _caminho_pdf_fatura(fatura) -> Path:
     if not fatura or not fatura["caminho_final"]:
-        raise HTTPException(status_code=404, detail="Arquivo da fatura nao encontrado.")
+        raise HTTPException(status_code=404, detail="Arquivo da fatura não encontrado.")
     caminho = Path(fatura["caminho_final"]).resolve()
     data_root = DATA_DIR.resolve()
     if data_root not in caminho.parents and caminho != data_root:
         raise HTTPException(status_code=403, detail="Caminho fora da pasta de dados.")
     if not caminho.exists() or not caminho.is_file():
-        raise HTTPException(status_code=404, detail="Arquivo da fatura nao encontrado.")
+        raise HTTPException(status_code=404, detail="Arquivo da fatura não encontrado.")
     if caminho.suffix.lower() != ".pdf":
-        raise HTTPException(status_code=400, detail="Arquivo da fatura nao e PDF.")
+        raise HTTPException(status_code=400, detail="Arquivo da fatura não é PDF.")
     return caminho
 
 
@@ -90,7 +90,7 @@ def _motivos_confianca(dados: dict) -> list[str]:
         if campo == "cnpj" and not dados.get("cnpj"):
             continue
         if float(confianca.get(campo, 0.0) or 0.0) < minimo:
-            motivos.append(f"Confianca baixa para {campo}")
+            motivos.append(f"Confiança baixa para {campo}")
     live = [cnpj for cnpj in dados.get("cnpjs", []) if (cnpj or "").startswith("35303139")]
     if len(set(live)) > 1:
         motivos.append("Mais de um CNPJ LIVE! encontrado")
@@ -100,19 +100,19 @@ def _motivos_confianca(dados: dict) -> list[str]:
 def _motivos(cnpj: str, loja, operadora: str, valor: str, vencimento: str) -> list[str]:
     motivos = []
     if not cnpj:
-        motivos.append("CNPJ da loja nao identificado")
+        motivos.append("CNPJ da loja não identificado")
     elif not cnpj.startswith("35303139"):
-        motivos.append("CNPJ identificado nao pertence ao prefixo LIVE! 35.303.139")
+        motivos.append("CNPJ identificado não pertence ao prefixo LIVE! 35.303.139")
     elif not loja:
         motivos.append(motivo_cnpj_live_nao_cadastrado(cnpj))
     if not operadora:
-        motivos.append("Operadora nao identificada com seguranca.")
+        motivos.append("Operadora não identificada com segurança.")
     if not valor:
-        motivos.append("Valor nao identificado")
+        motivos.append("Valor não identificado")
     if not vencimento:
-        motivos.append("Vencimento nao identificado")
+        motivos.append("Vencimento não identificado")
     if cnpj and not validar_cnpj(cnpj):
-        motivos.append("CNPJ com digitos verificadores invalidos")
+        motivos.append("CNPJ com dígitos verificadores inválidos")
     return motivos
 
 
@@ -159,7 +159,7 @@ def _ajustar_identidade_automatica(dados: dict, texto: str, nome_original: str) 
 
 
 def _extrair_pdfs_zip(conteudo: bytes) -> list[tuple[str, bytes]]:
-    """Le ZIP em memoria; nao extrai caminhos para o disco (protege contra Zip Slip)."""
+    """Lê ZIP em memória; não extrai caminhos para o disco (protege contra Zip Slip)."""
     try:
         zf = zipfile.ZipFile(io.BytesIO(conteudo))
     except (zipfile.BadZipFile, ValueError) as exc:
@@ -170,9 +170,9 @@ def _extrair_pdfs_zip(conteudo: bytes) -> list[tuple[str, bytes]]:
     with zf:
         infos = [info for info in zf.infolist() if not info.is_dir() and info.filename.lower().endswith(".pdf")]
         if not infos:
-            raise ValueError("O ZIP nao contem arquivos PDF.")
+            raise ValueError("O ZIP não contém arquivos PDF.")
         if len(infos) > MAX_PDFS_ZIP:
-            raise ValueError(f"O ZIP contem mais de {MAX_PDFS_ZIP} PDFs e foi recusado por seguranca.")
+            raise ValueError(f"O ZIP contém mais de {MAX_PDFS_ZIP} PDFs e foi recusado por segurança.")
         for info in infos:
             if info.flag_bits & 0x1:
                 raise ValueError(f"PDF protegido por senha dentro do ZIP: {Path(info.filename).name}")
@@ -180,7 +180,7 @@ def _extrair_pdfs_zip(conteudo: bytes) -> list[tuple[str, bytes]]:
                 raise ValueError(f"PDF muito grande dentro do ZIP: {Path(info.filename).name}")
             total_descompactado += info.file_size
             if total_descompactado > MAX_ZIP_UNCOMPRESSED_BYTES:
-                raise ValueError("O ZIP descompactado ultrapassa o limite de seguranca.")
+                raise ValueError("O ZIP descompactado ultrapassa o limite de segurança.")
             try:
                 pdf = zf.read(info)
             except Exception as exc:
@@ -219,7 +219,7 @@ def _processar_pdf(nome_original: str, conteudo: bytes) -> dict:
         "motivo": "",
     }
     if not conteudo.startswith(b"%PDF"):
-        resultado["motivo"] = "Arquivo nao parece ser um PDF valido."
+        resultado["motivo"] = "Arquivo não parece ser um PDF válido."
         return resultado
 
     arquivo_sha256 = _sha256(conteudo)
@@ -303,7 +303,7 @@ def _processar_pdf(nome_original: str, conteudo: bytes) -> dict:
         loja_para_validacao = resolucao_loja.loja if cnpj else None
         motivos.extend(_motivos(cnpj, loja_para_validacao, dados.get("operadora", ""), dados.get("valor", ""), dados.get("vencimento", "")))
         if resolucao_loja.confirmado and resolucao_loja.metodo_identificacao_loja == "DADOS_DOCUMENTO_UNICO":
-            motivos = [motivo for motivo in motivos if motivo != "CNPJ da loja nao identificado"]
+            motivos = [motivo for motivo in motivos if motivo != "CNPJ da loja não identificado"]
         motivos = list(dict.fromkeys(motivos))
         if motivos:
             destino_final = mover_pdf(caminho_temp, caminho_revisar(nome_original))
@@ -465,7 +465,7 @@ def auditoria_fatura(request: Request, fatura_id: int, msg: str = ""):
         return request.app.state.templates.TemplateResponse(
             request,
             "auditoria_fatura.html",
-            {"fatura": None, "msg": msg, "erro": "Fatura nao encontrada."},
+            {"fatura": None, "msg": msg, "erro": "Fatura não encontrada."},
             status_code=404,
         )
 
@@ -568,7 +568,7 @@ def confirmar(
         motivos = _motivos(cnpj_norm, loja, operadora_norm, valor_norm, vencimento_norm)
         origem = Path(fatura["caminho_final"]) if fatura and fatura["caminho_final"] else None
         if not fatura or not origem or not origem.exists():
-            motivos.append("Arquivo temporario nao encontrado")
+            motivos.append("Arquivo temporário não encontrado")
 
         if motivos:
             destino = mover_pdf(origem, caminho_revisar(fatura["arquivo_original"])) if origem and origem.exists() else origem
@@ -592,8 +592,8 @@ def confirmar(
                     fatura_id,
                 ),
             )
-            logger.info("Fatura enviada para revisao: %s", "; ".join(motivos))
-            return RedirectResponse(f"/revisar?msg=Fatura enviada para revisao", status_code=303)
+            logger.info("Fatura enviada para revisão: %s", "; ".join(motivos))
+            return RedirectResponse(f"/revisar?msg=Fatura enviada para revisão", status_code=303)
 
         destino = caminho_arquivado(nome_exibicao_loja(loja), "", operadora_norm, vencimento_norm, valor_norm, cnpj_norm)
         final = mover_pdf(origem, destino)
@@ -733,10 +733,10 @@ def reprocessar(fatura_id: int):
     with conectar() as conn:
         fatura = conn.execute("SELECT * FROM faturas WHERE id = ?", (fatura_id,)).fetchone()
         if not fatura:
-            return RedirectResponse("/historico?msg=Fatura nao encontrada", status_code=303)
+            return RedirectResponse("/historico?msg=Fatura não encontrada", status_code=303)
         caminho = Path(fatura["caminho_final"] or "")
         if not caminho.exists():
-            return RedirectResponse(f"/faturas/{fatura_id}/revisar?msg=Arquivo da fatura nao encontrado para reprocessar", status_code=303)
+            return RedirectResponse(f"/faturas/{fatura_id}/revisar?msg=Arquivo da fatura não encontrado para reprocessar", status_code=303)
         texto = extrair_texto_pdf(caminho)
         dados = _ajustar_identidade_automatica(parsear_texto(texto), texto, fatura["arquivo_original"] or caminho.name)
         cnpj = dados.get("cnpj", "")
@@ -763,7 +763,7 @@ def reprocessar(fatura_id: int):
         loja_para_validacao = resolucao_loja.loja if cnpj else None
         motivos.extend(_motivos(cnpj, loja_para_validacao, dados.get("operadora", ""), dados.get("valor", ""), dados.get("vencimento", "")))
         if resolucao_loja.confirmado and resolucao_loja.metodo_identificacao_loja == "DADOS_DOCUMENTO_UNICO":
-            motivos = [motivo for motivo in motivos if motivo != "CNPJ da loja nao identificado"]
+            motivos = [motivo for motivo in motivos if motivo != "CNPJ da loja não identificado"]
         motivos = list(dict.fromkeys(motivos))
         if motivos:
             novo_status = STATUS_REVISAR

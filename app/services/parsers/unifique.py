@@ -53,11 +53,11 @@ class ParserUnifique(ParserGenerico):
                     origem = "Encontrado em area da operadora/beneficiario"
                 if not validar_cnpj(cnpj):
                     score = min(score, 0.55)
-                    origem += "; digitos verificadores invalidos"
+                    origem += "; dígitos verificadores inválidos"
                 candidatos.append((cnpj, max(0.0, min(1.0, score)), origem))
         candidatos.sort(key=lambda item: item[1], reverse=True)
         if not candidatos:
-            return "", 0.0, "CNPJ do cliente nao encontrado"
+            return "", 0.0, "CNPJ do cliente não encontrado"
         return candidatos[0]
 
     def identificar_cnpj_fornecedor(self, texto: str, cnpj_cliente: str = "") -> str:
@@ -100,7 +100,7 @@ class ParserUnifique(ParserGenerico):
                 proximas = linhas[idx + 1 : idx + 8]
                 for candidata in proximas:
                     if re.fullmatch(r"R\$\s*\d{1,3}(?:\.\d{3})*,\d{2}", candidata):
-                        return normalizar_valor(candidata), 0.96, 'Encontrado na coluna "Valor" do resumo da cobranca'
+                        return normalizar_valor(candidata), 0.96, 'Encontrado na coluna "Valor" do resumo da cobrança'
         return super().identificar_valor(texto)
 
     def identificar_codigo_cliente(self, texto: str) -> str:
@@ -122,4 +122,4 @@ class ParserUnifique(ParserGenerico):
             contexto = sem_acentos(" ".join(linhas[max(0, idx - 4) : idx + 2])).lower()
             if "circuito" in contexto and re.fullmatch(r"[0-9]{10,14}", linha):
                 return linha, 0.93, 'Encontrado na tabela de servicos, coluna "Circuito"'
-        return "", 0.0, "Conta/circuito nao encontrado"
+        return "", 0.0, "Conta/circuito não encontrado"

@@ -202,10 +202,10 @@ class ParserGenerico:
                     origem = "Encontrado proximo de dados do cliente"
                 if any(rotulo in contexto for rotulo in ROTULOS_PRESTADOR):
                     score -= 0.25
-                    origem = "Encontrado em area possivelmente ligada ao prestador"
+                    origem = "Encontrado em área possivelmente ligada ao prestador"
                 if not validar_cnpj(cnpj):
                     score = min(score, 0.55)
-                    origem += "; digitos verificadores invalidos"
+                    origem += "; dígitos verificadores inválidos"
                 candidatos.append((cnpj, max(0.0, min(1.0, score)), origem))
         if not candidatos:
             for match in CNPJ_RE.finditer(texto):
@@ -214,7 +214,7 @@ class ParserGenerico:
                 score = 0.45 if validar_cnpj(cnpj) else 0.30
                 candidatos.append((cnpj, score, origem))
         if not candidatos:
-            return "", 0.0, "CNPJ nao encontrado"
+            return "", 0.0, "CNPJ não encontrado"
         candidatos.sort(key=lambda item: item[1], reverse=True)
         if len(candidatos) > 1 and candidatos[0][1] == candidatos[1][1]:
             return "", 0.45, "Mais de um CNPJ com confianca semelhante"
@@ -234,7 +234,7 @@ class ParserGenerico:
         if achado:
             valor = achado.group(1) if achado.groups() else achado.group(0)
             return valor, 0.55, "Encontrado por busca generica"
-        return "", 0.0, "Nao encontrado"
+        return "", 0.0, "Não encontrado"
 
     def identificar_vencimento(self, texto: str) -> tuple[str, float, str]:
         valor, conf, origem = self._campo_por_rotulo(
@@ -269,7 +269,7 @@ class ParserGenerico:
             valor_norm = normalizar_valor(achado.group(0))
             if valor_norm:
                 return valor_norm, 0.55, "Encontrado por busca generica"
-        return "", 0.0, "Nao encontrado"
+        return "", 0.0, "Não encontrado"
 
     def identificar_codigo_fatura(self, texto: str) -> tuple[str, float, str]:
         linhas = limpar_linhas(texto)
@@ -302,7 +302,7 @@ class ParserGenerico:
             valor = _limpar_codigo(_codigo_extraido(achado))
             if _codigo_valido(valor):
                 return valor, 0.55, "Encontrado por busca generica"
-        return "", 0.0, "Nao encontrado"
+        return "", 0.0, "Não encontrado"
 
     def identificar_razao_social(self, texto: str) -> str:
         linhas = limpar_linhas(texto)
@@ -318,12 +318,12 @@ class ParserGenerico:
     def gerar_avisos(self, resultado: ResultadoParser) -> list[str]:
         avisos = []
         if resultado.cnpj and not validar_cnpj(resultado.cnpj):
-            avisos.append("CNPJ com digitos verificadores invalidos")
+            avisos.append("CNPJ com dígitos verificadores inválidos")
         if len(resultado.cnpjs) > 1:
             avisos.append("Mais de um CNPJ encontrado")
         if not resultado.operadora:
-            avisos.append("Operadora nao identificada")
+            avisos.append("Operadora não identificada")
         for campo in ["cnpj", "valor", "vencimento", "codigo"]:
             if resultado.confianca.get(campo, 0.0) < 0.80:
-                avisos.append(f"Confianca baixa para {campo}")
+                avisos.append(f"Confiança baixa para {campo}")
         return avisos

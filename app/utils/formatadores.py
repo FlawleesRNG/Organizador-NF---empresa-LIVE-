@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
@@ -220,5 +221,8 @@ def sanitizar_nome_path(valor: str | None, padrao: str = "SEM-NOME") -> str:
 
 
 def status_badge(status: str | None) -> str:
-    texto = re.sub(r"[^A-Za-z0-9]+", "-", status or "").strip("-")
+    sem_acentos = "".join(
+        ch for ch in unicodedata.normalize("NFKD", status or "") if not unicodedata.combining(ch)
+    )
+    texto = re.sub(r"[^A-Za-z0-9]+", "-", sem_acentos).strip("-")
     return texto.lower()

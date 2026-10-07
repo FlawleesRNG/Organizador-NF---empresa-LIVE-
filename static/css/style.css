@@ -216,20 +216,33 @@ td.actions .button {
 .history-table th,
 .history-table td {
     padding: 12px 12px;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
 }
-.history-table .col-date { width: 120px; }
+.history-table .col-date { width: 112px; }
 .history-table .col-file { width: 190px; }
-.history-table .col-store { width: 150px; }
-.history-table .col-city { width: 112px; }
-.history-table .col-cnpj { width: 140px; }
-.history-table .col-carrier { width: 92px; }
+.history-table .col-store { width: 170px; }
+.history-table .col-city { width: 125px; }
+.history-table .col-cnpj { width: 150px; }
+.history-table .col-carrier { width: 110px; }
 .history-table .col-value { width: 88px; }
-.history-table .col-due { width: 98px; }
-.history-table .col-code { width: 122px; }
+.history-table .col-due { width: 108px; }
+.history-table .col-code { width: 130px; }
 .history-table .col-status { width: 108px; }
 .history-table .col-audit { width: 135px; }
 .history-table .col-actions { width: 105px; }
+.history-table td:nth-child(2),
+.history-table td:nth-child(3),
+.history-table td:nth-child(4) {
+    overflow-wrap: anywhere;
+}
+.history-table td:nth-child(5),
+.history-table td:nth-child(7),
+.history-table td:nth-child(8),
+.history-table td:nth-child(9),
+.history-table td:nth-child(10),
+.history-table td:nth-child(11) {
+    white-space: nowrap;
+}
 .history-table td:nth-child(11) {
     text-align: center;
 }

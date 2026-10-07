@@ -159,7 +159,7 @@ def criar(
         return request.app.state.templates.TemplateResponse(
             request,
             "nova_loja.html",
-            _form_context(loja_form, "Nao foi possivel cadastrar. Verifique se codigo ou CNPJ ja existem."),
+            _form_context(loja_form, "Não foi possível cadastrar. Verifique se código ou CNPJ já existem."),
             status_code=400,
         )
     return RedirectResponse("/lojas?msg=Loja cadastrada com sucesso", status_code=303)
@@ -244,7 +244,7 @@ def atualizar(
         return request.app.state.templates.TemplateResponse(
             request,
             "editar_loja.html",
-            _form_context(loja_form, "Nao foi possivel salvar. Verifique se codigo ou CNPJ ja existem."),
+            _form_context(loja_form, "Não foi possível salvar. Verifique se código ou CNPJ já existem."),
             status_code=400,
         )
     return RedirectResponse("/lojas?msg=Loja atualizada", status_code=303)
@@ -275,7 +275,7 @@ async def importar_preview(request: Request, arquivo: UploadFile = File(...)):
         return request.app.state.templates.TemplateResponse(
             request,
             "importar_lojas.html",
-            {"erro": "Nao foi possivel ler o CSV. Verifique o cabecalho e o separador.", "msg": ""},
+            {"erro": "Não foi possível ler o CSV. Verifique o cabeçalho e o separador.", "msg": ""},
             status_code=400,
         )
     return request.app.state.templates.TemplateResponse(request, "preview_importacao_lojas.html", preview)

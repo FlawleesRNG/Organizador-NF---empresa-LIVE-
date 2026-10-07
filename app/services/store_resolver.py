@@ -81,7 +81,7 @@ def auditar_base_mestre(conn: Connection) -> list[str]:
         """
     ).fetchall()
     for row in duplicados_codigo:
-        problemas.append(f"Codigo de loja duplicado na base mestre: {row['codigo_loja']}")
+        problemas.append(f"Código de loja duplicado na base mestre: {row['codigo_loja']}")
 
     invalidos = conn.execute(
         """
@@ -112,7 +112,7 @@ def _validar_secundarios(texto: str, loja: Row) -> tuple[bool | None, bool | Non
             validacao_cidade = True
         elif "MUNICIPIO" in texto_norm or "CIDADE" in texto_norm or "ENDERECO" in texto_norm:
             validacao_cidade = False
-            conflitos.append(f"Cidade da base ({loja['cidade']}) nao encontrada/coerente no documento")
+            conflitos.append(f"Cidade da base ({loja['cidade']}) não encontrada/coerente no documento")
 
     if uf:
         padrao_uf = re.compile(rf"(?<![A-Z]){re.escape(uf)}(?![A-Z])")
@@ -120,7 +120,7 @@ def _validar_secundarios(texto: str, loja: Row) -> tuple[bool | None, bool | Non
             validacao_uf = True
         elif " UF " in f" {texto_norm} " or "ESTADO" in texto_norm or "ENDERECO" in texto_norm:
             validacao_uf = False
-            conflitos.append(f"UF da base ({loja['uf']}) nao encontrada/coerente no documento")
+            conflitos.append(f"UF da base ({loja['uf']}) não encontrada/coerente no documento")
 
     return validacao_cidade, validacao_uf, conflitos
 

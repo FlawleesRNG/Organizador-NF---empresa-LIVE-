@@ -10,7 +10,7 @@ STATUS_CONFERE = "CONFERE"
 STATUS_DIVERGENCIA = "DIVERGENCIA"
 STATUS_REVISAR = "REVISAR"
 STATUS_SEM_CORRESPONDENCIA = "SEM CORRESPONDENCIA"
-STATUS_CNPJ_NAO_CADASTRADO = "CNPJ NAO CADASTRADO"
+STATUS_CNPJ_NAO_CADASTRADO = "CNPJ NÃO CADASTRADO"
 STATUS_ERRO_LEITURA = "ERRO DE LEITURA"
 
 
@@ -47,16 +47,16 @@ def comparar_campos(item: dict | None, pdf: dict, loja_encontrada: bool, confian
         linhas.append(
             {
                 "campo": label,
-                "email": formatter(email_raw) if email_raw else "NAO INFORMADO",
-                "pdf": formatter(pdf_raw) if pdf_raw else "NAO IDENTIFICADO",
+                "email": formatter(email_raw) if email_raw else "NÃO INFORMADO",
+                "pdf": formatter(pdf_raw) if pdf_raw else "NÃO IDENTIFICADO",
                 "status": status,
             }
         )
     linhas.append(
         {
             "campo": "VALOR",
-            "email": "NAO INFORMADO",
-            "pdf": formatar_valor(pdf.get("valor")) if pdf.get("valor") else "NAO IDENTIFICADO",
+            "email": "NÃO INFORMADO",
+            "pdf": formatar_valor(pdf.get("valor")) if pdf.get("valor") else "NÃO IDENTIFICADO",
             "status": "INFORMATIVO",
         }
     )

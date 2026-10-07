@@ -180,7 +180,7 @@ def normalizar_linha(row_index: int, raw: dict[str, str]) -> LinhaLoja:
     if cnpj_original and len(cnpj_digits) != 14:
         problemas.append("CNPJ com quantidade de digitos invalida")
     if cnpj_original and cnpj and not validar_cnpj(cnpj):
-        problemas.append("CNPJ com digitos verificadores invalidos")
+        problemas.append("CNPJ com dígitos verificadores inválidos")
     if not cnpj_original:
         problemas.append("CNPJ ausente")
     if not uf:
@@ -236,7 +236,7 @@ def gerar_preview(conteudo: bytes) -> dict:
         if linha.cnpj in cnpj_dup:
             linha.problemas.append("CNPJ duplicado no arquivo")
         if linha.codigo_loja in codigo_dup:
-            linha.problemas.append("Codigo duplicado no arquivo")
+            linha.problemas.append("Código duplicado no arquivo")
         if not linha.cnpj and not cnpj_nullable:
             linha.problemas.append("Banco atual ainda exige CNPJ fisico para novas lojas")
         if linha.cnpj and linha.cnpj in existentes_cnpj:

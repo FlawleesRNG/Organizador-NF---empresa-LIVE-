@@ -93,7 +93,7 @@ class LojasMasterTests(unittest.TestCase):
         ).encode("utf-8")
         preview = gerar_preview(csv)
         problemas = " ".join(" ".join(l.problemas) for l in preview["linhas"])
-        self.assertIn("Codigo duplicado", problemas)
+        self.assertIn("Código duplicado", problemas)
         self.assertIn("CNPJ duplicado", problemas)
 
     def test_importacao_atualiza_por_cnpj_sem_duplicar(self):
