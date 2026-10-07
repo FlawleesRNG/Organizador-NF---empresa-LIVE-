@@ -230,6 +230,9 @@ td.actions .button {
 .history-table .col-status { width: 108px; }
 .history-table .col-audit { width: 135px; }
 .history-table .col-actions { width: 105px; }
+.history-table td:nth-child(11) {
+    text-align: center;
+}
 .history-table td.actions {
     min-width: 0;
     padding: 10px;
