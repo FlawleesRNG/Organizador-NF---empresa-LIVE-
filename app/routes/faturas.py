@@ -538,7 +538,18 @@ def confirmar(
 
 
 @router.get("/historico")
-def historico(request: Request, loja: str = "", operadora: str = "", status: str = "", q: str = "", msg: str = ""):
+def historico(
+    request: Request,
+    loja: str = "",
+    codigo_loja: str = "",
+    nome_loja: str = "",
+    cidade: str = "",
+    uf: str = "",
+    operadora: str = "",
+    status: str = "",
+    q: str = "",
+    msg: str = "",
+):
     sql = """
         SELECT f.*, l.codigo_loja loja_codigo, l.nome loja_nome, l.cidade loja_cidade, l.uf loja_uf
         FROM faturas f
@@ -551,6 +562,18 @@ def historico(request: Request, loja: str = "", operadora: str = "", status: str
     if loja:
         sql += " AND l.id = ?"
         params.append(loja)
+    if codigo_loja:
+        sql += " AND REPLACE(UPPER(COALESCE(l.codigo_loja, '')), ' ', '') LIKE ?"
+        params.append(f"%{codigo_loja.upper().replace(' ', '')}%")
+    if nome_loja:
+        sql += " AND UPPER(COALESCE(l.nome, '')) LIKE ?"
+        params.append(f"%{nome_loja.upper()}%")
+    if cidade:
+        sql += " AND UPPER(COALESCE(l.cidade, '')) LIKE ?"
+        params.append(f"%{cidade.upper()}%")
+    if uf:
+        sql += " AND UPPER(COALESCE(l.uf, '')) = ?"
+        params.append(uf.upper())
     if operadora:
         sql += " AND f.operadora = ?"
         params.append(operadora)
@@ -558,18 +581,51 @@ def historico(request: Request, loja: str = "", operadora: str = "", status: str
         sql += " AND f.status = ?"
         params.append(status)
     if q:
-        sql += " AND (f.arquivo_original LIKE ? OR f.codigo_fatura LIKE ? OR f.cnpj LIKE ? OR l.nome LIKE ?)"
+        sql += """
+            AND (
+                f.arquivo_original LIKE ?
+                OR f.codigo_fatura LIKE ?
+                OR f.cnpj LIKE ?
+                OR l.nome LIKE ?
+                OR l.codigo_loja LIKE ?
+                OR l.cidade LIKE ?
+                OR l.uf LIKE ?
+            )
+        """
         busca = f"%{q}%"
-        params.extend([busca, busca, busca, busca])
+        params.extend([busca, busca, busca, busca, busca, busca, busca])
     sql += " ORDER BY f.created_at DESC"
     with conectar() as conn:
         faturas = conn.execute(sql, params).fetchall()
-        lojas = conn.execute("SELECT id, codigo_loja, nome, uf FROM lojas ORDER BY COALESCE(codigo_loja, ''), nome").fetchall()
+        lojas = conn.execute("SELECT id, codigo_loja, nome, cidade, uf FROM lojas ORDER BY COALESCE(codigo_loja, ''), nome").fetchall()
+        codigos_loja = conn.execute("SELECT DISTINCT codigo_loja FROM lojas WHERE codigo_loja IS NOT NULL AND codigo_loja != '' ORDER BY codigo_loja").fetchall()
+        nomes_loja = conn.execute("SELECT DISTINCT nome FROM lojas WHERE nome IS NOT NULL AND nome != '' ORDER BY nome").fetchall()
+        cidades = conn.execute("SELECT DISTINCT cidade FROM lojas WHERE cidade IS NOT NULL AND cidade != '' ORDER BY cidade").fetchall()
+        ufs = conn.execute("SELECT DISTINCT uf FROM lojas WHERE uf IS NOT NULL AND uf != '' ORDER BY uf").fetchall()
         operadoras = conn.execute("SELECT DISTINCT operadora FROM faturas WHERE ativo_historico = 1 AND operadora IS NOT NULL AND operadora != '' ORDER BY operadora").fetchall()
     return request.app.state.templates.TemplateResponse(
         request,
         "historico.html",
-        {"faturas": faturas, "lojas": lojas, "operadoras": operadoras, "filtro": {"loja": loja, "operadora": operadora, "status": status, "q": q}, "msg": msg},
+        {
+            "faturas": faturas,
+            "lojas": lojas,
+            "codigos_loja": codigos_loja,
+            "nomes_loja": nomes_loja,
+            "cidades": cidades,
+            "ufs": ufs,
+            "operadoras": operadoras,
+            "filtro": {
+                "loja": loja,
+                "codigo_loja": codigo_loja,
+                "nome_loja": nome_loja,
+                "cidade": cidade,
+                "uf": uf,
+                "operadora": operadora,
+                "status": status,
+                "q": q,
+            },
+            "msg": msg,
+        },
     )
 
 

@@ -4,7 +4,23 @@
 <form class="filters" method="get">
     <select name="loja">
         <option value="">Todas as lojas</option>
-        {% for item in lojas %}<option value="{{ item.id }}" {% if filtro.loja|string == item.id|string %}selected{% endif %}>{{ (item.codigo_loja ~ " - ") if item.codigo_loja else "" }}{{ item.nome }} - {{ item.uf }}</option>{% endfor %}
+        {% for item in lojas %}<option value="{{ item.id }}" {% if filtro.loja|string == item.id|string %}selected{% endif %}>{{ (item.codigo_loja ~ " - ") if item.codigo_loja else "" }}{{ item.nome }}{{ (" - " ~ item.cidade) if item.cidade else "" }} - {{ item.uf }}</option>{% endfor %}
+    </select>
+    <input name="codigo_loja" list="codigos-loja" placeholder="Codigo da loja, ex: L234" value="{{ filtro.codigo_loja }}">
+    <datalist id="codigos-loja">
+        {% for item in codigos_loja %}<option value="{{ item.codigo_loja }}"></option>{% endfor %}
+    </datalist>
+    <input name="nome_loja" list="nomes-loja" placeholder="Nome da loja" value="{{ filtro.nome_loja }}">
+    <datalist id="nomes-loja">
+        {% for item in nomes_loja %}<option value="{{ item.nome }}"></option>{% endfor %}
+    </datalist>
+    <input name="cidade" list="cidades-loja" placeholder="Cidade" value="{{ filtro.cidade }}">
+    <datalist id="cidades-loja">
+        {% for item in cidades %}<option value="{{ item.cidade }}"></option>{% endfor %}
+    </datalist>
+    <select name="uf">
+        <option value="">Todos os estados</option>
+        {% for item in ufs %}<option value="{{ item.uf }}" {% if filtro.uf == item.uf %}selected{% endif %}>{{ item.uf }}</option>{% endfor %}
     </select>
     <select name="operadora">
         <option value="">Todas as operadoras</option>
@@ -16,6 +32,7 @@
     </select>
     <input name="q" placeholder="Buscar" value="{{ filtro.q }}">
     <button class="button" type="submit">Filtrar</button>
+    <a class="button ghost" href="/historico">Limpar</a>
 </form>
 <div class="table-wrap">
     <table>

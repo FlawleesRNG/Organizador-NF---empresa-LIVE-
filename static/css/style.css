@@ -169,9 +169,10 @@ th { background: #f8fafc; color: #465366; font-size: 13px; text-transform: upper
 .danger-text { color: var(--danger); }
 .filters {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 1.2fr auto;
+    grid-template-columns: repeat(4, minmax(150px, 1fr)) auto auto;
     gap: 10px;
     margin-bottom: 16px;
+    align-items: center;
 }
 
 .mail-status, .process-section {
