@@ -35,7 +35,7 @@ def resolver_loja_por_dados_documento(conn: Connection, texto: str, cnpj_live: s
     cnpj = normalizar_cnpj(cnpj_live)
     regras = [
         {
-            "codigo": "L321",
+            "codigo": "L320",
             "nome": "CASCAVEL SHOPP CATUAI",
             "sinais": [
                 lambda t: _tem(t, "CASCAVEL", "CATUAI"),
@@ -44,23 +44,48 @@ def resolver_loja_por_dados_documento(conn: Connection, texto: str, cnpj_live: s
             ],
         },
         {
-            "codigo": "L342",
+            "codigo": "L341",
             "nome": "SJC SHOPP VALE SUL",
             "sinais": [
                 lambda t: _tem(t, "SHOPPING VALE SUL"),
                 lambda t: _tem(t, "VALE SUL", "SAO JOSE DOS CAMPOS"),
                 lambda t: _tem(t, "AVENIDA ANDROMEDA", "SAO JOSE DOS CAMPOS"),
-                lambda t: _tem(t, "AV DEP BENEDITO MATARAZZO", "SAO JOSE DOS CAMPOS"),
-                lambda t: _tem(t, "AV DEP BENEDITO MATARAZZO", "LJ M137"),
             ],
         },
         {
-            "codigo": "L241",
-            "nome": "FAZENDA BOA VISTA",
+            "codigo": "L393",
+            "nome": "BOA VISTA VILLAGE",
             "sinais": [
                 lambda t: _tem(t, "BOA VISTA VILLAGE", "PORTO FELIZ"),
                 lambda t: _tem(t, "COND BOA VISTA VILLAGE"),
                 lambda t: _tem(t, "RODOVIA CASTELO BRANCO", "BOA VISTA VILLAGE"),
+            ],
+        },
+        {
+            "codigo": "L380",
+            "nome": "VITORIA SHOPP",
+            "sinais": [
+                lambda t: _tem(t, "AV AMERICO BUAIZ", "VITORIA"),
+                lambda t: _tem(t, "ENSEADA DO SUA", "VITORIA"),
+                lambda t: _tem(t, "VITORIA", "29050-420"),
+            ],
+        },
+        {
+            "codigo": "L381",
+            "nome": "CAMPINA GRANDE SHOPP PARTAGE",
+            "sinais": [
+                lambda t: _tem(t, "CAMPINA GRANDE", "CATOL"),
+                lambda t: _tem(t, "PREFEITO SEVERINO BEZERRA CABRAL", "CAMPINA GRANDE"),
+                lambda t: _tem(t, "SHOPPING PARTAGE", "CAMPINA GRANDE"),
+            ],
+        },
+        {
+            "codigo": "L447",
+            "nome": "SJC SHOPP CENTER VALE",
+            "sinais": [
+                lambda t: _tem(t, "CENTER VALE", "SAO JOSE DOS CAMPOS"),
+                lambda t: _tem(t, "DEP BENEDITO MATARAZZO", "LJ M137"),
+                lambda t: _tem(t, "JARDIM OSWALDO CRUZ", "SAO JOSE DOS CAMPOS"),
             ],
         },
     ]
