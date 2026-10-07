@@ -18,7 +18,7 @@
 * { box-sizing: border-box; }
 body {
     margin: 0;
-    font-family: "Segoe UI", "Inter", Arial, sans-serif;
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
     color: var(--text);
     background: var(--bg);
     display: flex;
@@ -42,32 +42,16 @@ body {
 }
 
 .brand-mark {
-    width: 31px;
-    height: 31px;
+    width: 42px;
+    height: 42px;
     display: grid;
     place-items: center;
-    position: relative;
-}
-.brand-mark::before,
-.brand-mark::after {
-    content: "";
-    position: absolute;
-    border-radius: 4px;
-    transform: skewX(-24deg);
-}
-.brand-mark::before {
-    width: 24px;
-    height: 11px;
-    left: 3px;
-    top: 4px;
-    background: #c9c9c9;
-}
-.brand-mark::after {
-    width: 24px;
-    height: 11px;
-    left: 3px;
-    bottom: 4px;
-    background: #b7b7b7;
+    border-radius: 13px;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    box-shadow: 0 10px 22px rgba(161, 115, 61, .22);
 }
 
 .brand strong {
