@@ -23,6 +23,7 @@
                 <th>Codigo</th>
                 <th>Unidade</th>
                 <th>Tipo</th>
+                <th>Razao social</th>
                 <th>CNPJ</th>
                 <th>Cidade</th>
                 <th>UF</th>
@@ -37,6 +38,7 @@
                 <td>{{ linha.codigo_loja or "-" }}</td>
                 <td>{{ linha.nome or "-" }}</td>
                 <td>{{ linha.tipo_loja or "-" }}</td>
+                <td>{{ linha.razao_social or "-" }}</td>
                 <td>{{ linha.cnpj|cnpj if linha.cnpj else "-" }}</td>
                 <td>{{ linha.cidade or "-" }}</td>
                 <td>{{ linha.uf or "-" }}</td>

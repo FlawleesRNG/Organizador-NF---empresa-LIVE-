@@ -7,6 +7,7 @@
     <label>Codigo da loja<input name="codigo_loja" value="{{ loja.codigo_loja or '' }}" placeholder="L164"></label>
     <label>Unidade<input name="nome" required value="{{ loja.nome }}"></label>
     <label>Tipo<input name="tipo_loja" value="{{ loja.tipo_loja or '' }}" placeholder="Loja Propria"></label>
+    <label>Razao social<input name="razao_social" value="{{ loja.razao_social or '' }}" placeholder="LIVE STORE BRASIL COM ROUPAS..."></label>
     <label>CNPJ<input name="cnpj" value="{{ loja.cnpj|cnpj if loja.cnpj else '' }}" placeholder="35.303.139/0037-08"></label>
     <label>Cidade<input name="cidade" value="{{ loja.cidade or '' }}" placeholder="Sao Paulo"></label>
     <label>UF<input name="uf" maxlength="2" value="{{ loja.uf or '' }}"></label>

@@ -35,7 +35,7 @@ def init_db() -> None:
             """
             CREATE TABLE IF NOT EXISTS lojas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                cnpj TEXT NOT NULL UNIQUE,
+                cnpj TEXT,
                 nome TEXT NOT NULL,
                 uf TEXT NOT NULL,
                 ativo INTEGER NOT NULL DEFAULT 1,
@@ -44,6 +44,7 @@ def init_db() -> None:
             )
             """
         )
+        _migrar_lojas_cnpj_nullable(conn)
         _migrar_colunas_lojas(conn)
         conn.execute(
             """
@@ -80,6 +81,7 @@ def _migrar_colunas_lojas(conn: sqlite3.Connection) -> None:
         "codigo_loja": "TEXT",
         "tipo_loja": "TEXT",
         "cidade": "TEXT",
+        "razao_social": "TEXT",
         "status_cadastro": "TEXT NOT NULL DEFAULT 'OK'",
     }
     for nome, tipo in novas_colunas.items():
@@ -89,7 +91,60 @@ def _migrar_colunas_lojas(conn: sqlite3.Connection) -> None:
     conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_lojas_cnpj ON lojas(cnpj) WHERE cnpj IS NOT NULL AND cnpj != ''")
 
 
+def _migrar_lojas_cnpj_nullable(conn: sqlite3.Connection) -> None:
+    colunas_info = conn.execute("PRAGMA table_info(lojas)").fetchall()
+    cnpj_info = next((row for row in colunas_info if row["name"] == "cnpj"), None)
+    if not cnpj_info or not cnpj_info["notnull"]:
+        return
+
+    conn.commit()
+    conn.execute("PRAGMA foreign_keys = OFF")
+    conn.execute("PRAGMA legacy_alter_table = ON")
+    conn.execute("ALTER TABLE lojas RENAME TO lojas_old")
+    conn.execute(
+        """
+        CREATE TABLE lojas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cnpj TEXT,
+            nome TEXT NOT NULL,
+            uf TEXT NOT NULL,
+            ativo INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            codigo_loja TEXT,
+            tipo_loja TEXT,
+            cidade TEXT,
+            razao_social TEXT,
+            status_cadastro TEXT NOT NULL DEFAULT 'OK'
+        )
+        """
+    )
+    colunas_antigas = {row["name"] for row in colunas_info}
+
+    def coluna(nome: str, padrao: str = "NULL") -> str:
+        return nome if nome in colunas_antigas else padrao
+
+    conn.execute(
+        f"""
+        INSERT INTO lojas (
+            id, cnpj, nome, uf, ativo, created_at, updated_at,
+            codigo_loja, tipo_loja, cidade, razao_social, status_cadastro
+        )
+        SELECT
+            id, cnpj, nome, uf, ativo, created_at, updated_at,
+            {coluna('codigo_loja')}, {coluna('tipo_loja')}, {coluna('cidade')},
+            {coluna('razao_social')}, {coluna('status_cadastro', "'OK'")}
+        FROM lojas_old
+        """
+    )
+    conn.execute("DROP TABLE lojas_old")
+    conn.commit()
+    conn.execute("PRAGMA legacy_alter_table = OFF")
+    conn.execute("PRAGMA foreign_keys = ON")
+
+
 def _migrar_colunas_faturas(conn: sqlite3.Connection) -> None:
+    _migrar_fk_faturas_lojas(conn)
     colunas = {row["name"] for row in conn.execute("PRAGMA table_info(faturas)").fetchall()}
     novas_colunas = {
         "sha256": "TEXT",
@@ -137,6 +192,30 @@ def _migrar_colunas_faturas(conn: sqlite3.Connection) -> None:
         """
     )
     _criar_tabelas_email(conn)
+
+
+def _migrar_fk_faturas_lojas(conn: sqlite3.Connection) -> None:
+    tabelas_fk = {row["table"] for row in conn.execute("PRAGMA foreign_key_list(faturas)").fetchall()}
+    if "lojas_old" not in tabelas_fk:
+        return
+
+    row_sql = conn.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'faturas'").fetchone()
+    if not row_sql or not row_sql["sql"]:
+        return
+    sql_novo = row_sql["sql"].replace("CREATE TABLE faturas", "CREATE TABLE faturas_new", 1)
+    sql_novo = sql_novo.replace('REFERENCES "lojas_old"', "REFERENCES lojas")
+    sql_novo = sql_novo.replace("REFERENCES lojas_old", "REFERENCES lojas")
+    colunas = [row["name"] for row in conn.execute("PRAGMA table_info(faturas)").fetchall()]
+    lista_colunas = ", ".join(colunas)
+
+    conn.commit()
+    conn.execute("PRAGMA foreign_keys = OFF")
+    conn.execute(sql_novo)
+    conn.execute(f"INSERT INTO faturas_new ({lista_colunas}) SELECT {lista_colunas} FROM faturas")
+    conn.execute("DROP TABLE faturas")
+    conn.execute("ALTER TABLE faturas_new RENAME TO faturas")
+    conn.commit()
+    conn.execute("PRAGMA foreign_keys = ON")
 
 
 def _criar_tabelas_email(conn: sqlite3.Connection) -> None:

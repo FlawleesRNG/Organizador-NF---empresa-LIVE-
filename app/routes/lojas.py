@@ -57,8 +57,8 @@ def listar(request: Request, q: str = "", tipo: str = "", uf: str = "", status: 
     params: list[str] = []
     if q:
         busca = f"%{q.strip()}%"
-        sql += " AND (codigo_loja LIKE ? OR nome LIKE ? OR cnpj LIKE ? OR cidade LIKE ?)"
-        params.extend([busca, busca, busca, busca])
+        sql += " AND (codigo_loja LIKE ? OR nome LIKE ? OR razao_social LIKE ? OR cnpj LIKE ? OR cidade LIKE ?)"
+        params.extend([busca, busca, busca, busca, busca])
     if tipo:
         sql += " AND tipo_loja = ?"
         params.append(tipo)
@@ -99,6 +99,7 @@ def criar(
     codigo_loja: str = Form(""),
     nome: str = Form(...),
     tipo_loja: str = Form(""),
+    razao_social: str = Form(""),
     cnpj: str = Form(""),
     cidade: str = Form(""),
     uf: str = Form(""),
@@ -113,6 +114,7 @@ def criar(
         "codigo_loja": codigo_norm,
         "nome": nome_norm,
         "tipo_loja": tipo_loja,
+        "razao_social": normalizar_nome_loja(razao_social),
         "cnpj": cnpj,
         "cidade": cidade_norm,
         "uf": uf_norm,
@@ -137,14 +139,15 @@ def criar(
         with conectar() as conn:
             conn.execute(
                 """
-                INSERT INTO lojas (codigo_loja, cnpj, nome, tipo_loja, cidade, uf, ativo, status_cadastro, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
+                INSERT INTO lojas (codigo_loja, cnpj, nome, tipo_loja, razao_social, cidade, uf, ativo, status_cadastro, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
                 """,
                 (
                     codigo_norm or None,
                     cnpj_norm or None,
                     nome_norm,
                     tipo_loja.strip() or None,
+                    normalizar_nome_loja(razao_social) or None,
                     cidade_norm or None,
                     uf_norm or "",
                     status,
@@ -175,6 +178,7 @@ def atualizar(
     codigo_loja: str = Form(""),
     nome: str = Form(...),
     tipo_loja: str = Form(""),
+    razao_social: str = Form(""),
     cnpj: str = Form(""),
     cidade: str = Form(""),
     uf: str = Form(""),
@@ -192,6 +196,7 @@ def atualizar(
         "codigo_loja": codigo_norm,
         "nome": nome_norm,
         "tipo_loja": tipo_loja,
+        "razao_social": normalizar_nome_loja(razao_social),
         "cnpj": cnpj,
         "cidade": cidade_norm,
         "uf": uf_norm,
@@ -217,7 +222,7 @@ def atualizar(
             conn.execute(
                 """
                 UPDATE lojas
-                SET codigo_loja = ?, cnpj = ?, nome = ?, tipo_loja = ?, cidade = ?,
+                SET codigo_loja = ?, cnpj = ?, nome = ?, tipo_loja = ?, razao_social = ?, cidade = ?,
                     uf = ?, ativo = ?, status_cadastro = ?, updated_at = ?
                 WHERE id = ?
                 """,
@@ -226,6 +231,7 @@ def atualizar(
                     cnpj_norm or None,
                     nome_norm,
                     tipo_loja.strip() or None,
+                    normalizar_nome_loja(razao_social) or None,
                     cidade_norm or None,
                     uf_norm or "",
                     ativo_norm,

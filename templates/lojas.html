@@ -48,13 +48,14 @@
 
 <div class="table-wrap">
     <table>
-        <thead><tr><th>Codigo</th><th>Unidade</th><th>Tipo</th><th>CNPJ</th><th>Cidade</th><th>UF</th><th>Status</th><th>Acoes</th></tr></thead>
+        <thead><tr><th>Codigo</th><th>Unidade</th><th>Tipo</th><th>Razao social</th><th>CNPJ</th><th>Cidade</th><th>UF</th><th>Status</th><th>Acoes</th></tr></thead>
         <tbody>
         {% for loja in lojas %}
             <tr>
                 <td>{{ loja.codigo_loja or "-" }}</td>
                 <td>{{ loja.nome }}</td>
                 <td>{{ loja.tipo_loja or "-" }}</td>
+                <td>{{ loja.razao_social or "-" }}</td>
                 <td>{{ loja.cnpj|cnpj if loja.cnpj else "-" }}</td>
                 <td>{{ loja.cidade or "-" }}</td>
                 <td>{{ loja.uf }}</td>
@@ -67,7 +68,7 @@
                 </td>
             </tr>
         {% else %}
-            <tr><td colspan="8" class="empty">Nenhuma loja cadastrada.</td></tr>
+            <tr><td colspan="9" class="empty">Nenhuma loja cadastrada.</td></tr>
         {% endfor %}
         </tbody>
     </table>

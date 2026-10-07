@@ -41,6 +41,62 @@ UF_POR_CIDADE = {
     "RIO DE JANEIRO": "RJ",
     "JARAGUA DO SUL": "SC",
     "JARAGUÁ DO SUL": "SC",
+    "LONDRINA": "PR",
+    "BRASILIA": "DF",
+    "BRASÍLIA": "DF",
+    "CASCAVEL": "PR",
+    "NITEROI": "RJ",
+    "NITERÓI": "RJ",
+    "FOZ DO IGUACU": "PR",
+    "FOZ DO IGUAÇU": "PR",
+    "GOIANIA": "GO",
+    "GOIÂNIA": "GO",
+    "PETROLINA": "PE",
+    "MANAUS": "AM",
+    "RIBEIRAO PRETO": "SP",
+    "RIBEIRÃO PRETO": "SP",
+    "BARUERI": "SP",
+    "BAURU": "SP",
+    "ARMACAO DOS BUZIOS": "RJ",
+    "ARMAÇÃO DOS BÚZIOS": "RJ",
+    "UBERLANDIA": "MG",
+    "UBERLÂNDIA": "MG",
+    "ITAJAI": "SC",
+    "ITAJAÍ": "SC",
+    "CRICIUMA": "SC",
+    "CRICIÚMA": "SC",
+    "BLUMENAU": "SC",
+    "BALNEARIO CAMBORIU": "SC",
+    "BALNEÁRIO CAMBORIÚ": "SC",
+    "JOINVILLE": "SC",
+    "CURITIBA": "PR",
+    "ALEXANIA": "GO",
+    "ALEXÂNIA": "GO",
+    "MORENO": "PE",
+    "CAMACARI": "BA",
+    "CAMAÇARI": "BA",
+    "ATIBAIA": "SP",
+    "ITUPEVA": "SP",
+    "GUARULHOS": "SP",
+    "SAO ROQUE": "SP",
+    "SÃO ROQUE": "SP",
+    "DUQUE DE CAXIAS": "RJ",
+    "CONTAGEM": "MG",
+    "PORTO BELO": "SC",
+    "CAMPO LARGO": "PR",
+    "PORTO FELIZ": "SP",
+    "TRANCOSO": "BA",
+    "SAO BERNARDO DO CAMPO": "SP",
+    "SÃO BERNARDO DO CAMPO": "SP",
+    "POMERODE": "SC",
+    "NOVA LIMA": "MG",
+    "GRAMADO": "RS",
+    "ITAQUAQUECETUBA": "SP",
+    "FLORIANOPOLIS": "SC",
+    "FLORIANÓPOLIS": "SC",
+    "CRAVINHOS": "SP",
+    "SAO JOSE DOS CAMPOS": "SP",
+    "SÃO JOSÉ DOS CAMPOS": "SP",
 }
 
 
@@ -60,6 +116,7 @@ class LinhaLoja:
     codigo_loja: str
     nome: str
     tipo_loja: str
+    razao_social: str
     cnpj: str
     cnpj_original: str
     cidade: str
@@ -76,6 +133,12 @@ def cnpj_coluna_permite_null(conn: sqlite3.Connection) -> bool:
     info = conn.execute("PRAGMA table_info(lojas)").fetchall()
     row = next((item for item in info if item["name"] == "cnpj"), None)
     return bool(row and not row["notnull"])
+
+
+def garantir_schema_lojas(conn: sqlite3.Connection) -> None:
+    colunas = {row["name"] if hasattr(row, "keys") else row[1] for row in conn.execute("PRAGMA table_info(lojas)").fetchall()}
+    if "razao_social" not in colunas:
+        conn.execute("ALTER TABLE lojas ADD COLUMN razao_social TEXT")
 
 
 def inferir_uf(cidade: str, uf: str = "") -> tuple[str, bool]:
@@ -104,6 +167,7 @@ def normalizar_linha(row_index: int, raw: dict[str, str]) -> LinhaLoja:
     codigo = normalizar_codigo_loja(dados.get("CODIGO_LOJA") or dados.get("CODIGO") or dados.get("CODIGO_L") or "")
     nome = normalizar_nome_loja(dados.get("NOME") or dados.get("UNIDADE") or dados.get("LOJA") or "")
     tipo = (dados.get("TIPO_LOJA") or dados.get("TIPO") or "").strip()
+    razao_social = normalizar_nome_loja(dados.get("RAZAO_SOCIAL") or dados.get("RAZÃO_SOCIAL") or "")
     cidade = normalizar_cidade(dados.get("CIDADE") or "")
     uf, _ = inferir_uf(cidade, dados.get("UF") or "")
     cnpj_original = dados.get("CNPJ") or ""
@@ -126,6 +190,7 @@ def normalizar_linha(row_index: int, raw: dict[str, str]) -> LinhaLoja:
         codigo_loja=codigo,
         nome=nome,
         tipo_loja=tipo,
+        razao_social=razao_social,
         cnpj=cnpj,
         cnpj_original=cnpj_original,
         cidade=cidade,
@@ -152,6 +217,7 @@ def gerar_preview(conteudo: bytes) -> dict:
     codigo_dup = {item for item, count in Counter(codigos).items() if count > 1}
     conn = sqlite3.connect(DB_PATH)
     try:
+        garantir_schema_lojas(conn)
         conn.row_factory = sqlite3.Row
         existentes_cnpj = {
             row["cnpj"]: row["id"]
@@ -214,6 +280,7 @@ def aplicar_importacao(payload_b64: str) -> dict:
     conn.row_factory = sqlite3.Row
     try:
         conn.execute("BEGIN")
+        garantir_schema_lojas(conn)
         for linha in linhas:
             if any("duplicado" in problema.lower() for problema in linha.problemas):
                 raise ValueError(f"Linha {linha.row_index}: duplicidade no arquivo")
@@ -227,7 +294,7 @@ def aplicar_importacao(payload_b64: str) -> dict:
             if existente:
                 conn.execute(
                     """
-                    UPDATE lojas SET codigo_loja = ?, nome = ?, tipo_loja = ?, cnpj = ?, cidade = ?,
+                    UPDATE lojas SET codigo_loja = ?, nome = ?, tipo_loja = ?, razao_social = ?, cnpj = ?, cidade = ?,
                         uf = ?, ativo = ?, status_cadastro = ?, updated_at = ?
                     WHERE id = ?
                     """,
@@ -235,6 +302,7 @@ def aplicar_importacao(payload_b64: str) -> dict:
                         linha.codigo_loja or None,
                         linha.nome,
                         linha.tipo_loja or None,
+                        linha.razao_social or None,
                         linha.cnpj or None,
                         linha.cidade or None,
                         linha.uf or None,
@@ -247,13 +315,14 @@ def aplicar_importacao(payload_b64: str) -> dict:
             else:
                 conn.execute(
                     """
-                    INSERT INTO lojas (codigo_loja, nome, tipo_loja, cnpj, cidade, uf, ativo, status_cadastro, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO lojas (codigo_loja, nome, tipo_loja, razao_social, cnpj, cidade, uf, ativo, status_cadastro, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         linha.codigo_loja or None,
                         linha.nome,
                         linha.tipo_loja or None,
+                        linha.razao_social or None,
                         linha.cnpj or None,
                         linha.cidade or None,
                         linha.uf or None,
@@ -275,7 +344,7 @@ def aplicar_importacao(payload_b64: str) -> dict:
 def exportar_csv() -> str:
     output = io.StringIO()
     writer = csv.writer(output, delimiter=";")
-    writer.writerow(["codigo_loja", "nome", "tipo_loja", "cnpj", "cidade", "uf", "status"])
+    writer.writerow(["codigo_loja", "nome", "tipo_loja", "razao_social", "cnpj", "cidade", "uf", "status"])
     conn = sqlite3.connect(DB_PATH)
     try:
         conn.row_factory = sqlite3.Row
@@ -285,6 +354,7 @@ def exportar_csv() -> str:
                     row["codigo_loja"] or "",
                     row["nome"] or "",
                     row["tipo_loja"] or "",
+                    row["razao_social"] if "razao_social" in row.keys() and row["razao_social"] else "",
                     formatar_cnpj(row["cnpj"]) if row["cnpj"] else "",
                     row["cidade"] or "",
                     row["uf"] or "",

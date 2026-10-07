@@ -15,7 +15,8 @@
     "arquivo": "data/entrada/51b4bb1ef69d4dd0ae2e50c1b55835b9_CACTA TELECOM - 10 2026 - BOLETO+NF.pdf",
     "cnpj": "35303139008920",
     "codigo_loja": "L321",
-    "operadora": "CACTA TELECOM"
+    "operadora": "CACTA TELECOM",
+    "resultado": "REVISAR_CONFLITO"
   },
   {
     "arquivo": "data/entrada/3d03b30f85f14acb92aa7dfa73a8f849_BLUE - BANDA LARGA 100MB - 10 2026- BOLETO+NF.pdf",

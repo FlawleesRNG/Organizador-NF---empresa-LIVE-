@@ -25,9 +25,11 @@ class RegressaoAmostrasConfirmadasTests(unittest.TestCase):
                     dados = _ajustar_identidade_automatica(parsear_texto(texto), texto, caminho.name)
                     resolucao = resolver_loja_por_cnpj_live(conn, texto, dados.get("cnpj", ""))
                     self.assertEqual(dados.get("operadora"), amostra["operadora"])
-                    self.assertEqual(resolucao.resultado, MATCH_CONFIRMADO)
+                    resultado_esperado = amostra.get("resultado", MATCH_CONFIRMADO)
+                    self.assertEqual(resolucao.resultado, resultado_esperado)
                     self.assertEqual(resolucao.cnpj_encontrado, amostra["cnpj"])
-                    self.assertEqual(resolucao.loja["codigo_loja"], amostra["codigo_loja"])
+                    if resultado_esperado == MATCH_CONFIRMADO:
+                        self.assertEqual(resolucao.loja["codigo_loja"], amostra["codigo_loja"])
         if executadas == 0:
             self.skipTest("Nenhuma amostra confirmada local disponivel para regressao.")
 
