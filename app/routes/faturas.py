@@ -8,8 +8,8 @@ import zipfile
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import APIRouter, File, Form, Request, UploadFile
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse, RedirectResponse
 
 from app.database import DATA_DIR, agora, conectar
 from app.models import STATUS_ARQUIVADA, STATUS_ERRO, STATUS_REVISAR
@@ -36,6 +36,20 @@ logger = logging.getLogger("telemiza")
 MAX_PDFS_ZIP = 250
 MAX_PDF_BYTES = 40 * 1024 * 1024
 MAX_ZIP_UNCOMPRESSED_BYTES = 500 * 1024 * 1024
+
+
+def _caminho_pdf_fatura(fatura) -> Path:
+    if not fatura or not fatura["caminho_final"]:
+        raise HTTPException(status_code=404, detail="Arquivo da fatura nao encontrado.")
+    caminho = Path(fatura["caminho_final"]).resolve()
+    data_root = DATA_DIR.resolve()
+    if data_root not in caminho.parents and caminho != data_root:
+        raise HTTPException(status_code=403, detail="Caminho fora da pasta de dados.")
+    if not caminho.exists() or not caminho.is_file():
+        raise HTTPException(status_code=404, detail="Arquivo da fatura nao encontrado.")
+    if caminho.suffix.lower() != ".pdf":
+        raise HTTPException(status_code=400, detail="Arquivo da fatura nao e PDF.")
+    return caminho
 
 
 def _buscar_loja(conn, cnpj: str):
@@ -412,6 +426,29 @@ def revisar_fatura(request: Request, fatura_id: int, msg: str = ""):
         "revisar.html",
         {"fatura": fatura, "loja": loja, "cnpjs": cnpjs, "outros_cnpjs": outros_cnpjs, "msg": msg, "erro": ""},
     )
+
+
+@router.get("/faturas/{fatura_id}/arquivo")
+def abrir_arquivo_fatura(fatura_id: int):
+    with conectar() as conn:
+        fatura = conn.execute("SELECT * FROM faturas WHERE id = ?", (fatura_id,)).fetchone()
+    caminho = _caminho_pdf_fatura(fatura)
+    nome = fatura["arquivo_final"] or fatura["arquivo_original"] or caminho.name
+    return FileResponse(
+        path=str(caminho),
+        media_type="application/pdf",
+        filename=nome,
+        headers={"Content-Disposition": f'inline; filename="{nome}"'},
+    )
+
+
+@router.get("/faturas/{fatura_id}/download")
+def baixar_arquivo_fatura(fatura_id: int):
+    with conectar() as conn:
+        fatura = conn.execute("SELECT * FROM faturas WHERE id = ?", (fatura_id,)).fetchone()
+    caminho = _caminho_pdf_fatura(fatura)
+    nome = fatura["arquivo_final"] or fatura["arquivo_original"] or caminho.name
+    return FileResponse(path=str(caminho), media_type="application/pdf", filename=nome)
 
 
 @router.post("/faturas/{fatura_id}/confirmar")

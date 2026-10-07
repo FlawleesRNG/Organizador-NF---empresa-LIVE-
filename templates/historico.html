@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<header class="page-head"><div><h1>Historico</h1><p>Faturas processadas pelo sistema.</p></div></header>
+<header class="page-head"><div><h1>Historico</h1><p>Consulte as faturas processadas e abra o PDF arquivado pelo proprio sistema.</p></div></header>
 <form class="filters" method="get">
     <select name="loja">
         <option value="">Todas as lojas</option>
@@ -33,10 +33,14 @@
                 <td>{{ f.vencimento|data_br if f.vencimento else "-" }}</td>
                 <td>{{ f.codigo_fatura or "-" }}</td>
                 <td><span class="badge {{ f.status|status_badge }}">{{ f.status }}</span></td>
-                <td>
+                <td class="actions">
+                    {% if f.caminho_final %}
+                        <a class="button" href="/faturas/{{ f.id }}/arquivo" target="_blank">Abrir PDF</a>
+                        <a class="button ghost" href="/faturas/{{ f.id }}/download">Baixar</a>
+                    {% endif %}
                     {% if f.status in ["PENDENTE", "REVISAR"] %}
                         <a class="button" href="/faturas/{{ f.id }}/revisar">Revisar</a>
-                    {% else %}
+                    {% elif not f.caminho_final %}
                         -
                     {% endif %}
                 </td>
