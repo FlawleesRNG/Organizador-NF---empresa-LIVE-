@@ -48,10 +48,12 @@ class SecondaryStoreResolverTests(unittest.TestCase):
 
     def test_cascavel_catuai_por_dados_do_documento(self):
         texto = "Condominio: Shopping Cascavel Catuai - Referencia End: LOJA LUC 3019 Cascavel PR"
-        resolucao = resolver_loja_por_dados_documento(self.conn, texto, "35303139008920", "conflito")
+        resolucao = resolver_loja_por_dados_documento(self.conn, texto, "35303139008920", "base nao confirmou")
         self.assertEqual(resolucao.resultado, MATCH_CONFIRMADO)
         self.assertEqual(resolucao.loja["codigo_loja"], "L321")
         self.assertEqual(resolucao.metodo_identificacao_loja, "DADOS_DOCUMENTO_UNICO")
+        self.assertFalse(resolucao.conflitos)
+        self.assertIn("observacoes_base", resolucao.auditoria)
 
     def test_vale_sul_por_endereco(self):
         texto = "Avenida Andromeda, 227, LOJA SUC 297- Shopping Vale Sul - Sao Jose dos Campos - SP"

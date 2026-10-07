@@ -37,9 +37,9 @@
                     {% if f.metodo_identificacao_loja == "DADOS_DOCUMENTO_UNICO" %}
                         {% set audit = f.auditoria_loja_json|from_json %}
                         <span class="badge revisar">DADOS DA NOTA</span>
-                        <div class="muted">Loja identificada por endereço/unidade do documento.</div>
-                        {% if audit.conflitos %}
-                            <div class="muted">{{ audit.conflitos|join("; ") }}</div>
+                        <div class="muted">Loja identificada pela própria nota: endereço, cidade/UF e unidade.</div>
+                        {% if audit.observacoes_base %}
+                            <div class="muted">{{ audit.observacoes_base|join("; ") }}</div>
                         {% endif %}
                     {% elif f.metodo_identificacao_loja %}
                         <span class="badge ok">{{ f.metodo_identificacao_loja }}</span>

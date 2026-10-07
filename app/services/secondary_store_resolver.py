@@ -77,13 +77,13 @@ def resolver_loja_por_dados_documento(conn: Connection, texto: str, cnpj_live: s
         return None
 
     regra, loja = candidatos[0]
-    conflitos = []
+    observacoes_base = []
     if cnpj and loja["cnpj"] and cnpj != loja["cnpj"]:
-        conflitos.append(
-            f"CNPJ do documento ({formatar_cnpj(cnpj)}) difere do CNPJ da base para {loja['codigo_loja']} ({formatar_cnpj(loja['cnpj'])})"
+        observacoes_base.append(
+            f"Nota real informa {formatar_cnpj(cnpj)} para {regra['nome']}; cadastro atual da unidade registra {formatar_cnpj(loja['cnpj'])}."
         )
     if motivo_original:
-        conflitos.append(f"Resolucao primaria nao confirmou: {motivo_original}")
+        observacoes_base.append(f"Regra primária por base mestre não confirmou: {motivo_original}")
 
     return ResolucaoLoja(
         resultado=MATCH_CONFIRMADO,
@@ -93,11 +93,11 @@ def resolver_loja_por_dados_documento(conn: Connection, texto: str, cnpj_live: s
         motivo=f"Loja confirmada por dados fortes do documento: {regra['nome']}",
         validacao_cidade=True,
         validacao_uf=True,
-        conflitos=conflitos,
         auditoria={
             "origem_cnpj": "CNPJ informado no documento" if cnpj else "CNPJ LIVE! nao identificado",
             "confianca_cnpj": 0.99 if cnpj else 0.0,
             "sinais_identificacao_loja": regra["nome"],
-            "observacao": "Match secundario por unidade/endereco extraidos do documento.",
+            "observacao": "Nota real prevaleceu por unidade/endereco extraidos do documento.",
+            "observacoes_base": observacoes_base,
         },
     )
