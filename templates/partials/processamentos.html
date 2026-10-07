@@ -9,7 +9,7 @@
                 {% if loja_nome %}
                     {{ (loja_codigo ~ " - ") if loja_codigo else "" }}{{ loja_nome }}{{ (" - " ~ loja_uf) if loja_uf else "" }}
                 {% else %}
-                    CNPJ NAO CADASTRADO
+                    CNPJ NÃO CADASTRADO
                 {% endif %}
             </h3>
             <p>{{ f.operadora or "-" }} · CNPJ {{ f.cnpj|cnpj }} · Valor {{ f.valor|valor_br if f.valor else "-" }}</p>

@@ -501,7 +501,7 @@ def auditoria_fatura(request: Request, fatura_id: int, msg: str = ""):
             "tipo": "data",
         },
         {
-            "rotulo": "Codigo da fatura",
+            "rotulo": "Código da fatura",
             "valor": fatura["codigo_fatura"] or "-",
             "origem": fatura["origem_codigo"] or "-",
             "confianca": fatura["confianca_codigo"],

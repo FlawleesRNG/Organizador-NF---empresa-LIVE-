@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-<header class="page-head"><div><h1>Historico</h1><p>Consulte as faturas processadas e abra o PDF arquivado pelo proprio sistema.</p></div></header>
+<header class="page-head"><div><h1>Histórico</h1><p>Consulte as faturas processadas e abra o PDF arquivado pelo próprio sistema.</p></div></header>
 <form class="filters" method="get">
     <select name="loja">
         <option value="">Todas as lojas</option>
         {% for item in lojas %}<option value="{{ item.id }}" {% if filtro.loja|string == item.id|string %}selected{% endif %}>{{ (item.codigo_loja ~ " - ") if item.codigo_loja else "" }}{{ item.nome }}{{ (" - " ~ item.cidade) if item.cidade else "" }} - {{ item.uf }}</option>{% endfor %}
     </select>
-    <input name="codigo_loja" list="codigos-loja" placeholder="Codigo da loja, ex: L234" value="{{ filtro.codigo_loja }}">
+    <input name="codigo_loja" list="codigos-loja" placeholder="Código da loja, ex: L234" value="{{ filtro.codigo_loja }}">
     <datalist id="codigos-loja">
         {% for item in codigos_loja %}<option value="{{ item.codigo_loja }}"></option>{% endfor %}
     </datalist>
@@ -27,7 +27,7 @@
         {% for item in operadoras %}<option value="{{ item.operadora }}" {% if filtro.operadora == item.operadora %}selected{% endif %}>{{ item.operadora }}</option>{% endfor %}
     </select>
     <select name="status">
-        <option value="">Processadas e revisao</option>
+        <option value="">Processadas e revisão</option>
         {% for item in ["PENDENTE", "ARQUIVADA", "REVISAR", "ERRO"] %}<option value="{{ item }}" {% if filtro.status == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
     </select>
     <input name="q" placeholder="Buscar" value="{{ filtro.q }}">
@@ -35,14 +35,28 @@
     <a class="button ghost" href="/historico">Limpar</a>
 </form>
 <div class="table-wrap">
-    <table>
-        <thead><tr><th>Data processamento</th><th>Arquivo</th><th>Loja</th><th>Cidade/UF</th><th>CNPJ da nota</th><th>Operadora</th><th>Valor</th><th>Vencimento</th><th>Codigo</th><th>Status</th><th>Auditoria</th><th>Acoes</th></tr></thead>
+    <table class="history-table">
+        <colgroup>
+            <col class="col-date">
+            <col class="col-file">
+            <col class="col-store">
+            <col class="col-city">
+            <col class="col-cnpj">
+            <col class="col-carrier">
+            <col class="col-value">
+            <col class="col-due">
+            <col class="col-code">
+            <col class="col-status">
+            <col class="col-audit">
+            <col class="col-actions">
+        </colgroup>
+        <thead><tr><th>Data de processamento</th><th>Arquivo</th><th>Loja</th><th>Cidade/UF</th><th>CNPJ da nota</th><th>Operadora</th><th>Valor</th><th>Vencimento</th><th>Código</th><th>Status</th><th>Auditoria</th><th>Ações</th></tr></thead>
         <tbody>
         {% for f in faturas %}
             <tr>
                 <td>{{ f.created_at }}</td>
                 <td>{{ f.arquivo_original }}</td>
-                <td>{{ ((f.loja_codigo ~ " - ") if f.loja_codigo else "") ~ f.loja_nome ~ " - " ~ f.loja_uf if f.loja_nome else "CNPJ NAO CADASTRADO" }}</td>
+                <td>{{ ((f.loja_codigo ~ " - ") if f.loja_codigo else "") ~ f.loja_nome ~ " - " ~ f.loja_uf if f.loja_nome else "CNPJ NÃO CADASTRADO" }}</td>
                 <td>{{ ((f.loja_cidade ~ "/") if f.loja_cidade else "") ~ (f.loja_uf or "-") }}</td>
                 <td>{{ f.cnpj|cnpj }}</td>
                 <td>{{ f.operadora or "-" }}</td>

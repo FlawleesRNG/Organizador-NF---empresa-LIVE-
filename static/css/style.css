@@ -84,7 +84,7 @@ nav a:hover {
 
 .main {
     flex: 1;
-    padding: 52px;
+    padding: 40px;
     min-width: 0;
     height: 100vh;
     overflow: auto;
@@ -208,6 +208,36 @@ td.actions .button {
     width: 100%;
     min-height: 34px;
     padding: 7px 10px;
+}
+.history-table {
+    table-layout: fixed;
+    min-width: 1360px;
+}
+.history-table th,
+.history-table td {
+    padding: 12px 12px;
+    overflow-wrap: anywhere;
+}
+.history-table .col-date { width: 120px; }
+.history-table .col-file { width: 190px; }
+.history-table .col-store { width: 150px; }
+.history-table .col-city { width: 112px; }
+.history-table .col-cnpj { width: 140px; }
+.history-table .col-carrier { width: 92px; }
+.history-table .col-value { width: 88px; }
+.history-table .col-due { width: 98px; }
+.history-table .col-code { width: 122px; }
+.history-table .col-status { width: 108px; }
+.history-table .col-audit { width: 135px; }
+.history-table .col-actions { width: 105px; }
+.history-table td.actions {
+    min-width: 0;
+    padding: 10px;
+}
+.history-table td.actions .button {
+    font-size: 14px;
+    line-height: 1.15;
+    white-space: normal;
 }
 
 .alert {

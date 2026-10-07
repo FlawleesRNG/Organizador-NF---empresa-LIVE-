@@ -2,7 +2,7 @@
 {% block content %}
 <header class="page-head">
     <div>
-        <h1>Previa da importacao</h1>
+        <h1>Prévia da importação</h1>
         <p>Confira o resultado antes de gravar no banco.</p>
     </div>
 </header>
@@ -10,8 +10,8 @@
 <div class="cards">
     <div class="metric"><strong>{{ resumo.total_linhas }}</strong><span>linhas</span></div>
     <div class="metric"><strong>{{ resumo.novas_unidades }}</strong><span>novas</span></div>
-    <div class="metric"><strong>{{ resumo.atualizacoes }}</strong><span>atualizacoes</span></div>
-    <div class="metric"><strong>{{ resumo.cnpjs_invalidos }}</strong><span>CNPJ invalidos</span></div>
+    <div class="metric"><strong>{{ resumo.atualizacoes }}</strong><span>atualizações</span></div>
+    <div class="metric"><strong>{{ resumo.cnpjs_invalidos }}</strong><span>CNPJs inválidos</span></div>
     <div class="metric"><strong>{{ resumo.cnpjs_ausentes }}</strong><span>CNPJ ausentes</span></div>
 </div>
 
@@ -20,10 +20,10 @@
         <thead>
             <tr>
                 <th>Linha</th>
-                <th>Codigo</th>
+                <th>Código</th>
                 <th>Unidade</th>
                 <th>Tipo</th>
-                <th>Razao social</th>
+                <th>Razão social</th>
                 <th>CNPJ</th>
                 <th>Cidade</th>
                 <th>UF</th>
@@ -53,6 +53,6 @@
 <form method="post" action="/lojas/importar/confirmar" class="form-actions">
     <input type="hidden" name="payload" value="{{ payload }}">
     <a class="button" href="/lojas/importar">Voltar</a>
-    <button class="button primary" type="submit">Confirmar importacao</button>
+    <button class="button primary" type="submit">Confirmar importação</button>
 </form>
 {% endblock %}

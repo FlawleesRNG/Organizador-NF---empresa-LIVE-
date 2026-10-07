@@ -54,8 +54,8 @@
             {% if fatura.loja_razao_social %}
                 <p><strong>Razão social na base:</strong> {{ fatura.loja_razao_social }}</p>
             {% endif %}
-            <p><strong>Validação cidade:</strong> {{ "OK" if fatura.validacao_cidade else "Nao registrada" }}</p>
-            <p><strong>Validação UF:</strong> {{ "OK" if fatura.validacao_uf else "Nao registrada" }}</p>
+            <p><strong>Validação cidade:</strong> {{ "OK" if fatura.validacao_cidade else "Não registrada" }}</p>
+            <p><strong>Validação UF:</strong> {{ "OK" if fatura.validacao_uf else "Não registrada" }}</p>
         {% else %}
             <p class="danger-text"><strong>Nenhuma loja vinculada.</strong></p>
         {% endif %}
@@ -131,6 +131,6 @@
     </article>
 </section>
 {% else %}
-<div class="alert error">Fatura nao encontrada.</div>
+<div class="alert error">Fatura não encontrada.</div>
 {% endif %}
 {% endblock %}

@@ -5,12 +5,12 @@
 <section class="review-card">
     <p><strong>Arquivo:</strong> {{ fatura.arquivo_original }}</p>
     <p><strong>Parser:</strong> {{ fatura.parser_utilizado or "generico" }}</p>
-    <p><strong>Operadora detectada:</strong> {{ fatura.operadora or "Nao identificada" }}</p>
+    <p><strong>Operadora detectada:</strong> {{ fatura.operadora or "Não identificada" }}</p>
     {% if fatura.origem_operadora %}
-        <p><strong>Regra da operadora:</strong> {{ fatura.origem_operadora }}{% if fatura.confianca_operadora is not none %} | Confianca: {{ ((fatura.confianca_operadora or 0) * 100)|round|int }}%{% endif %}</p>
+        <p><strong>Regra da operadora:</strong> {{ fatura.origem_operadora }}{% if fatura.confianca_operadora is not none %} | Confiança: {{ ((fatura.confianca_operadora or 0) * 100)|round|int }}%{% endif %}</p>
     {% endif %}
     {% if fatura.motivo_revisao %}
-        <p><strong>Motivo da revisao:</strong> {{ fatura.motivo_revisao }}</p>
+        <p><strong>Motivo da revisão:</strong> {{ fatura.motivo_revisao }}</p>
     {% endif %}
     {% if fatura.resultado_identificacao_loja %}
         <p><strong>Resultado loja:</strong> {{ fatura.resultado_identificacao_loja }}</p>
@@ -19,7 +19,7 @@
     {% if loja %}
         <p><strong>Loja encontrada:</strong> {{ loja|loja_display }}</p>
     {% else %}
-        <p class="danger-text"><strong>CNPJ NAO CADASTRADO</strong></p>
+        <p class="danger-text"><strong>CNPJ NÃO CADASTRADO</strong></p>
     {% endif %}
     {% if fatura.cnpj_fornecedor %}
         <p><strong>CNPJ fornecedor:</strong> {{ fatura.cnpj_fornecedor|cnpj }}</p>
@@ -37,22 +37,22 @@
 </section>
 <form class="form-card" method="post" action="/faturas/{{ fatura.id }}/confirmar">
     <label>CNPJ do cliente<input name="cnpj" list="cnpj-options" required value="{{ fatura.cnpj|cnpj }}"></label>
-    <small>Origem: {{ fatura.origem_cnpj or "Nao registrada" }} | Confianca: {{ ((fatura.confianca_cnpj or 0) * 100)|round|int }}%</small>
+    <small>Origem: {{ fatura.origem_cnpj or "Não registrada" }} | Confiança: {{ ((fatura.confianca_cnpj or 0) * 100)|round|int }}%</small>
     <datalist id="cnpj-options">
         {% for item in cnpjs %}<option value="{{ item|cnpj }}"></option>{% endfor %}
     </datalist>
     <label>Operadora<input name="operadora" required value="{{ fatura.operadora or '' }}"></label>
     <label>Valor<input name="valor" required value="{{ fatura.valor|valor_br if fatura.valor else '' }}"></label>
-    <small>Origem: {{ fatura.origem_valor or "Nao registrada" }} | Confianca: {{ ((fatura.confianca_valor or 0) * 100)|round|int }}%</small>
+    <small>Origem: {{ fatura.origem_valor or "Não registrada" }} | Confiança: {{ ((fatura.confianca_valor or 0) * 100)|round|int }}%</small>
     <label>Vencimento<input name="vencimento" required value="{{ fatura.vencimento|data_br if fatura.vencimento else '' }}"></label>
-    <small>Origem: {{ fatura.origem_vencimento or "Nao registrada" }} | Confianca: {{ ((fatura.confianca_vencimento or 0) * 100)|round|int }}%</small>
-    <label>Codigo da fatura/conta<input name="codigo_fatura" value="{{ fatura.codigo_fatura or '' }}"></label>
-    <small>Origem: {{ fatura.origem_codigo or "Nao registrada" }} | Confianca: {{ ((fatura.confianca_codigo or 0) * 100)|round|int }}%</small>
+    <small>Origem: {{ fatura.origem_vencimento or "Não registrada" }} | Confiança: {{ ((fatura.confianca_vencimento or 0) * 100)|round|int }}%</small>
+    <label>Código da fatura/conta<input name="codigo_fatura" value="{{ fatura.codigo_fatura or '' }}"></label>
+    <small>Origem: {{ fatura.origem_codigo or "Não registrada" }} | Confiança: {{ ((fatura.confianca_codigo or 0) * 100)|round|int }}%</small>
     {% if fatura.codigo_cliente %}
-        <small>Codigo do cliente detectado: {{ fatura.codigo_cliente }}</small>
+        <small>Código do cliente detectado: {{ fatura.codigo_cliente }}</small>
     {% endif %}
     {% if fatura.numero_fatura %}
-        <small>Numero/cobranca detectado: {{ fatura.numero_fatura }}</small>
+        <small>Número/cobrança detectado: {{ fatura.numero_fatura }}</small>
     {% endif %}
     <div class="form-actions"><a class="button" href="/revisar">Cancelar</a><button class="button primary" type="submit">Confirmar</button></div>
 </form>
@@ -60,6 +60,6 @@
     <button class="button" type="submit">Reprocessar</button>
 </form>
 {% else %}
-<div class="alert error">Fatura nao encontrada.</div>
+<div class="alert error">Fatura não encontrada.</div>
 {% endif %}
 {% endblock %}

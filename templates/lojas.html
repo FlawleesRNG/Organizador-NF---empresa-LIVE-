@@ -3,7 +3,7 @@
 <header class="page-head">
     <div>
         <h1>Lojas</h1>
-        <p>Base mestre de unidades para associacao por CNPJ.</p>
+        <p>Base mestre de unidades para associação por CNPJ.</p>
     </div>
     <div class="header-actions">
         <a class="button" href="/lojas/importar">Importar CSV</a>
@@ -16,7 +16,7 @@
 
 <form class="filters" method="get">
     <label>Buscar
-        <input name="q" value="{{ filtro.q }}" placeholder="Codigo, unidade, CNPJ ou cidade">
+        <input name="q" value="{{ filtro.q }}" placeholder="Código, unidade, CNPJ ou cidade">
     </label>
     <label>Tipo
         <select name="tipo">
@@ -48,7 +48,7 @@
 
 <div class="table-wrap">
     <table>
-        <thead><tr><th>Codigo</th><th>Unidade</th><th>Tipo</th><th>Razao social</th><th>CNPJ</th><th>Cidade</th><th>UF</th><th>Status</th><th>Acoes</th></tr></thead>
+        <thead><tr><th>Código</th><th>Unidade</th><th>Tipo</th><th>Razão social</th><th>CNPJ</th><th>Cidade</th><th>UF</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody>
         {% for loja in lojas %}
             <tr>
