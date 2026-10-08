@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from app.database import DATA_DIR
-from app.services.arquivamento import caminho_arquivado, proximo_nome_disponivel
+from app.services.arquivamento import caminho_arquivado, nome_arquivo_arquivado, proximo_nome_disponivel
 from app.services.pdf_parser import parsear_texto
 from app.utils.formatadores import (
     formatar_cnpj,
@@ -133,10 +133,39 @@ class CoreTests(unittest.TestCase):
             "2026-08-20",
             "389.90",
             "35303139003708",
+            "899929200608",
         )
         self.assertIn(str(DATA_DIR / "arquivadas"), str(caminho))
         self.assertNotIn("..", str(caminho))
-        self.assertTrue(str(caminho).endswith("20-08-2026 - VIVO - R$389,90 - 35.303.139-0037-08.pdf"))
+        self.assertEqual(
+            caminho.name,
+            "SHOPPING-CENTER-NORTE - VIVO - VENC 20-08-2026 - R$389,90 - 899929200608.pdf",
+        )
+
+    def test_nome_arquivo_arquivado_usa_padrao_com_loja_e_codigo(self):
+        nome = nome_arquivo_arquivado(
+            "L320 - CASCAVEL SHOPP CATUAI - PR",
+            "CACTA TELECOM",
+            "2026-10-15",
+            "226.90",
+            "35303139008920",
+            "7773",
+        )
+        self.assertEqual(
+            nome,
+            "L320 - CASCAVEL SHOPP CATUAI - CACTA TELECOM - VENC 15-10-2026 - R$226,90 - 7773.pdf",
+        )
+
+    def test_nome_arquivo_arquivado_usa_cnpj_quando_codigo_ausente(self):
+        nome = nome_arquivo_arquivado(
+            "L447 - SJC SHOPP CENTER VALE - SP",
+            "CLARO",
+            "2026-10-15",
+            "155.87",
+            "35303139011557",
+            "",
+        )
+        self.assertTrue(nome.endswith("35.303.139-0115-57.pdf"))
 
     def test_protecao_sobrescrita(self):
         temp = Path(tempfile.mkdtemp(dir=DATA_DIR))

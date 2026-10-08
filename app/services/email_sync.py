@@ -11,12 +11,13 @@ from app.config import get_settings
 from app.database import DATA_DIR, agora, conectar
 from app.models import STATUS_REVISAR
 from app.services.comparativo import comparar_campos, dumps_comparativo, encontrar_match
+from app.services.arquivamento import nome_arquivo_arquivado
 from app.services.manutencao import sha256_arquivo
 from app.services.microsoft_graph import GraphAttachment, GraphMessage, GraphNotConfigured, MicrosoftGraphClient
 from app.services.parsers.base import ParserGenerico, identificar_cnpjs_live
 from app.services.pdf_parser import extrair_texto_pdf, parsear_texto
 from app.services.telemiza_email_parser import ItemEmail, parsear_email_telemiza
-from app.utils.formatadores import data_para_nome_arquivo, formatar_cnpj, formatar_valor, nome_exibicao_loja, normalizar_cnpj, sanitizar_nome_path
+from app.utils.formatadores import formatar_cnpj, nome_exibicao_loja, normalizar_cnpj, sanitizar_nome_path
 
 
 logger = logging.getLogger("telemiza")
@@ -95,14 +96,14 @@ def _ajustar_identidade_pdf(dados_pdf: dict, texto: str, nome_arquivo: str) -> d
 
 def _nome_sugerido(loja, dados_pdf: dict) -> str:
     loja_txt = nome_exibicao_loja(loja) if loja else "CNPJ NÃO CADASTRADO"
-    partes = [
+    return nome_arquivo_arquivado(
         loja_txt,
         dados_pdf.get("operadora") or "OPERADORA",
-        data_para_nome_arquivo(dados_pdf.get("vencimento")) if dados_pdf.get("vencimento") else "SEM DATA",
-        formatar_valor(dados_pdf.get("valor")) if dados_pdf.get("valor") else "SEM VALOR",
+        dados_pdf.get("vencimento") or "",
+        dados_pdf.get("valor") or "",
+        dados_pdf.get("cnpj") or "",
         dados_pdf.get("codigo_fatura") or "SEM CODIGO",
-    ]
-    return sanitizar_nome_path(" - ".join(partes) + ".pdf")
+    )
 
 
 def upsert_mensagem(message: GraphMessage, itens: list[ItemEmail]) -> int:

@@ -319,6 +319,7 @@ def _processar_pdf(nome_original: str, conteudo: bytes) -> dict:
                     dados.get("vencimento", ""),
                     dados.get("valor", ""),
                     cnpj,
+                    dados.get("codigo_fatura", ""),
                 ),
             )
             status_banco = STATUS_ARQUIVADA
@@ -595,7 +596,15 @@ def confirmar(
             logger.info("Fatura enviada para revisão: %s", "; ".join(motivos))
             return RedirectResponse(f"/revisar?msg=Fatura enviada para revisão", status_code=303)
 
-        destino = caminho_arquivado(nome_exibicao_loja(loja), "", operadora_norm, vencimento_norm, valor_norm, cnpj_norm)
+        destino = caminho_arquivado(
+            nome_exibicao_loja(loja),
+            "",
+            operadora_norm,
+            vencimento_norm,
+            valor_norm,
+            cnpj_norm,
+            codigo,
+        )
         final = mover_pdf(origem, destino)
         conn.execute(
             """
@@ -779,6 +788,7 @@ def reprocessar(fatura_id: int):
                     dados.get("vencimento", ""),
                     dados.get("valor", ""),
                     cnpj,
+                    dados.get("codigo_fatura", ""),
                 ),
             ) if caminho.exists() else caminho
         conn.execute(

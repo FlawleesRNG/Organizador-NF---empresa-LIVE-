@@ -37,17 +37,46 @@ def _garantir_dentro_data(caminho: Path) -> Path:
     return resolvido
 
 
-def caminho_arquivado(loja_nome: str, uf: str, operadora: str, vencimento: str, valor: str, cnpj: str) -> Path:
+def _rotulo_loja_arquivo(loja_nome: str) -> str:
+    partes = [parte.strip() for parte in (loja_nome or "").split(" - ") if parte.strip()]
+    if len(partes) >= 2 and len(partes[-1]) == 2 and partes[-1].isalpha():
+        partes = partes[:-1]
+    return " - ".join(partes)
+
+
+def nome_arquivo_arquivado(
+    loja_nome: str,
+    operadora: str,
+    vencimento: str,
+    valor: str,
+    cnpj: str,
+    codigo_fatura: str = "",
+) -> str:
+    loja = sanitizar_nome_path(_rotulo_loja_arquivo(loja_nome), "LOJA").strip(" -") or "LOJA"
+    operadora_segura = sanitizar_nome_path((operadora or "OPERADORA").upper(), "OPERADORA")
+    vencimento_nome = data_para_nome_arquivo(vencimento) if vencimento else "SEM-DATA"
+    valor_nome = formatar_valor(valor) if valor else "SEM-VALOR"
+    identificador = sanitizar_nome_path((codigo_fatura or "").strip(), "") or formatar_cnpj_arquivo(cnpj)
+    nome_pdf = f"{loja} - {operadora_segura} - VENC {vencimento_nome} - {valor_nome} - {identificador}.pdf"
+    return sanitizar_nome_path(nome_pdf, "fatura.pdf")
+
+
+def caminho_arquivado(
+    loja_nome: str,
+    uf: str,
+    operadora: str,
+    vencimento: str,
+    valor: str,
+    cnpj: str,
+    codigo_fatura: str = "",
+) -> Path:
     data = datetime.strptime(vencimento, "%Y-%m-%d")
     mes = f"{data.month:02d} - {MESES[data.month]}"
     loja_rotulo = f"{loja_nome} - {uf}" if uf else loja_nome
     loja = sanitizar_nome_path(loja_rotulo)
     operadora_segura = sanitizar_nome_path(operadora.upper())
-    nome_pdf = (
-        f"{data_para_nome_arquivo(vencimento)} - {operadora_segura} - "
-        f"{formatar_valor(valor)} - {formatar_cnpj_arquivo(cnpj)}.pdf"
-    )
-    caminho = DATA_DIR / "arquivadas" / str(data.year) / mes / loja / operadora_segura / sanitizar_nome_path(nome_pdf)
+    nome_pdf = nome_arquivo_arquivado(loja_rotulo, operadora, vencimento, valor, cnpj, codigo_fatura)
+    caminho = DATA_DIR / "arquivadas" / str(data.year) / mes / loja / operadora_segura / nome_pdf
     return _garantir_dentro_data(caminho)
 
 
